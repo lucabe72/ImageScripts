@@ -4,7 +4,6 @@ CPUS=8
 TARGET_PATH=/home/vrouter
 OUT_DIR=$PWD/Out/Host
 TMP_DIR=/tmp/BuildHost
-KVER=3.6.2
 KVER=3.4.14
 
 source $(dirname $0)/utils.sh
