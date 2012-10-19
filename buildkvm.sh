@@ -41,11 +41,10 @@ install_kvm() {
 }
 
 get_libs() {
-  APPS="qemu-system-x86_64"
   PROVIDED_LIBS="libpthread.so libgcc_s.so libc.so librt.so libstdc++.so libm.so libdl.so"
 
   mkdir -p $2/lib
-  for A in $APPS
+  for A in $3
    do
     get_exec_libs $1/bin/$A $2/lib
    done
@@ -56,11 +55,29 @@ get_libs() {
    done
 }
 
+get_libs64() {
+echo Get libs 64
+  LD_LINUX=$(strings $1/bin/$3 | grep ld-linux)
+  mkdir -p $2/lib64
+  for A in $3
+   do
+    get_exec_libs $1/bin/$A $2/lib64
+   done
+
+  cp $LD_LINUX $2/lib64
+}
+
 make_kvm() {
   get_kvm
   build_kvm /home/$VRUSER/Public-KVM-Test $CPUS
   install_kvm $1
-  get_libs $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER
+  MY_ARCH=$(/bin/arch)
+  if [[ $MY_ARCH = x86_64 ]];
+   then
+    get_libs64 $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER qemu-system-x86_64
+   else
+    get_libs $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER qemu-system-x86_64
+   fi
 }
 
 update_home() {
