@@ -47,6 +47,8 @@ echo build
   install_kernel $1
 }
 
+source $(dirname $0)/opts_parse.sh
+
 make_guest_kernel $TMP_DIR $2
 mkdir -p $OUT_DIR
 mv $TMP_DIR/bzImage $OUT_DIR
