@@ -29,9 +29,11 @@ install_grub() {
 }
 
 copy_grub() {
+  MY_ARCH=$(ls $2/lib/grub/)
+  echo GRUB Architecture: $MY_ARCH
   mount_partition $1 img1 /mnt
   sudo mkdir -p /mnt/boot/grub
-  sudo cp $2/lib/grub/i386-pc/stage? /mnt/boot/grub
+  sudo cp $2/lib/grub/$MY_ARCH/stage? /mnt/boot/grub
   cat > /tmp/GRUB/menu.lst << EOF
 default		0
 timeout		5
