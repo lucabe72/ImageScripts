@@ -9,26 +9,25 @@ KVER=3.4.14
 source $(dirname $0)/utils.sh
 
 get_kernel() {
-  if test -e linux-$KVER;
+  if test -e $1;
    then
-    echo linux-$KVER already exists
+    echo $1 already exists
    else
-    if test -e linux-$KVER.tar.bz2;
+    if test -e $1.tar.bz2;
      then
-      echo linux-$KVER.tar.bz2 already exists
+      echo $1.tar.bz2 already exists
      else
-      wget http://www.kernel.org/pub/linux/kernel/v3.0/linux-$KVER.tar.bz2
+      wget http://www.kernel.org/pub/linux/kernel/v3.0/$1.tar.bz2
      fi
-    tar xvjf linux-$KVER.tar.bz2
+    tar xvjf $1.tar.bz2
    fi
 }
 
 build_kernel() {
-  cd linux-$KVER
-echo  cp $1 .config
-  cp $1 .config
+  cd $1
+  cp $2 .config
   make oldconfig
-  make -j $2
+  make -j $3
   cd ..
 }
 
