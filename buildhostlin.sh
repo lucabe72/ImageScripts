@@ -40,16 +40,19 @@ install_kernel() {
 }
 
 make_host_kernel() {
-echo Make host $1 $2
-  get_kernel
-echo build
-  build_kernel $2 $CPUS
+  get_kernel   linux-$KVER
+  build_kernel linux-$KVER $2 $CPUS
   install_kernel $1
 }
 
 source $(dirname $0)/opts_parse.sh
 
-make_host_kernel $TMP_DIR $2
+if test -e $TMP_DIR;
+ then
+  echo $TMP_DIR already exists
+ else
+  make_host_kernel $TMP_DIR $2
+ fi
 mkdir -p $OUT_DIR
 mv $TMP_DIR/bzImage $OUT_DIR
 
