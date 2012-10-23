@@ -2,6 +2,7 @@ set -e
 
 CPUS=8
 KVER=3.4.14
+TMP_DIR=/tmp/GRUB
 
 source $(dirname $0)/utils.sh
 
@@ -55,6 +56,6 @@ EOF
 source $(dirname $0)/opts_parse.sh
 
 get_grub
-build_grub /tmp/GRUB $CPUS
+build_grub $TMP_DIR $CPUS
 install_grub
-copy_grub $1 /tmp/GRUB
+copy_grub $1 $TMP_DIR
