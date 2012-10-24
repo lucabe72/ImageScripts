@@ -1,5 +1,7 @@
 set -e
 
+SDIR=$(cd -- $(dirname $0) && pwd)
+
 GUEST_CONFIG=config-3.4-guest-32
 HOST_CONFIG=config-3.4-host-32
 export HOST_ARCH=x86
@@ -14,11 +16,11 @@ while getopts 4 opt
   esac
  done
 
-sh create_image.sh test.img 512 32
-sh create_image.sh opt1.img 48
+sh $SDIR/create_image.sh test.img 512 32
+sh $SDIR/create_image.sh opt1.img 48
 export ARCH=$GUEST_ARCH
-sh buildguest.sh $(pwd)/core.gz $(pwd)/Configs/$GUEST_CONFIG opt1.img test.img
-sh grubit.sh test.img
+sh $SDIR/buildguest.sh $SDIR/core.gz $SDIR/Configs/$GUEST_CONFIG opt1.img test.img
+sh $SDIR/grubit.sh test.img
 export ARCH=$HOST_ARCH
-sh buildhostlin.sh $(pwd)/core.gz $(pwd)/Configs/$HOST_CONFIG test.img
-sh buildkvm.sh test.img
+sh $SDIR/buildhostlin.sh $SDIR/core.gz $SDIR/Configs/$HOST_CONFIG test.img
+sh $SDIR/buildkvm.sh test.img
