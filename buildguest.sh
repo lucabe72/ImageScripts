@@ -2,8 +2,8 @@ set -e
 
 CPUS=8
 TARGET_PATH=/home/vrouter
-OUT_DIR=$PWD/Out/Host
-TMP_DIR=/tmp/BuildHost
+OUT_DIR=$PWD/Out/Guest
+TMP_DIR=/tmp/BuildGuest
 KVER=3.4.14
 
 source $(dirname $0)/utils.sh
