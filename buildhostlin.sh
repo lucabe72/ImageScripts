@@ -7,43 +7,6 @@ TMP_DIR=/tmp/BuildHost
 KVER=3.4.14
 
 source $(dirname $0)/utils.sh
-
-get_kernel() {
-  if test -e $1;
-   then
-    echo $1 already exists
-   else
-    if test -e $1.tar.bz2;
-     then
-      echo $1.tar.bz2 already exists
-     else
-      wget http://www.kernel.org/pub/linux/kernel/v3.0/$1.tar.bz2
-     fi
-    tar xvjf $1.tar.bz2
-   fi
-}
-
-build_kernel() {
-  cd $1
-  cp $2 .config
-  make oldconfig
-  make -j $3
-  cd ..
-}
-
-install_kernel() {
-  cd $1
-  make INSTALL_MOD_PATH=$2 modules_install
-  cp arch/x86/boot/bzImage $2
-  cd ..
-}
-
-make_kernel() {
-  get_kernel     linux-$KVER
-  build_kernel   linux-$KVER $2 $CPUS
-  install_kernel linux-$KVER $1
-}
-
 source $(dirname $0)/opts_parse.sh
 
 if test -e $TMP_DIR;
