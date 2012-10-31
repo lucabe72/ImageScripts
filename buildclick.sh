@@ -2,25 +2,11 @@ set -e
 
 CPUS=8
 TARGET_PATH=/home/vrouter
+OUT_DIR=$PWD/Out/Click
 TMP_DIR=/tmp/Click
-OUT_DIR=$PWD/Out
+KVER=3.0.36
 
 source $(dirname $0)/utils.sh
-
-get_kernel() {
-  if test -e linux-3.0.36;
-   then
-    echo linux-3.0.36 already exists
-   else
-    if test -e linux-3.0.36.tar.bz2;
-     then
-      echo linux-3.0.36.tar.bz2 already exists
-     else
-      wget http://www.kernel.org/pub/linux/kernel/v3.0/linux-3.0.36.tar.bz2
-     fi
-    tar xvjf linux-3.0.36.tar.bz2
-   fi
-}
 
 get_click() {
   if test -e click;
@@ -30,21 +16,6 @@ get_click() {
     git clone git://read.cs.ucla.edu/git/click
     git checkout -b test1 003061d8180c711f6c78b5395584772c1175205e
    fi
-}
-
-build_kernel() {
-  cd linux-3.0.36
-  cp $1 .config
-  make oldconfig
-  make -j $2
-  cd ..
-}
-
-install_kernel() {
-  cd linux-3.0.36
-  make INSTALL_MOD_PATH=$1 modules_install
-  cp arch/x86/boot/bzImage $1
-  cd ..
 }
 
 build_click() {
@@ -108,10 +79,10 @@ get_libs() {
 }
 
 make_click_kernel() {
-  get_kernel
+  get_kernel     linux-$KVER
+  build_kernel   linux-$KVER $2 $CPUS
+  install_kernel linux-$KVER $1
   get_click
-  build_kernel $2 $CPUS
-  install_kernel $1
   build_click $TARGET_PATH $CPUS
   install_click $1
   get_libs $1$TARGET_PATH
