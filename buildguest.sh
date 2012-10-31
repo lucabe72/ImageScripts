@@ -9,44 +9,49 @@ KVER=3.4.14
 source $(dirname $0)/utils.sh
 
 get_kernel() {
-  if test -e linux-$KVER;
+  if test -e $1;
    then
-    echo linux-$KVER already exists
+    echo $1 already exists
    else
-    if test -e linux-$KVER.tar.bz2;
+    if test -e $1.tar.bz2;
      then
-      echo linux-$KVER.tar.bz2 already exists
+      echo $1.tar.bz2 already exists
      else
-      wget http://www.kernel.org/pub/linux/kernel/v3.0/linux-$KVER.tar.bz2
+      wget http://www.kernel.org/pub/linux/kernel/v3.0/$1.tar.bz2
      fi
-    tar xvjf linux-$KVER.tar.bz2
+    tar xvjf $1.tar.bz2
    fi
 }
 
 build_kernel() {
-  cd linux-$KVER
-  cp $1 .config
+  cd $1
+  cp $2 .config
   make oldconfig
-  make -j $2
+  make -j $3
   cd ..
 }
 
 install_kernel() {
-  cd linux-$KVER
-  make INSTALL_MOD_PATH=$1 modules_install
-  cp arch/x86/boot/bzImage $1
+  cd $1
+  make INSTALL_MOD_PATH=$2 modules_install
+  cp arch/x86/boot/bzImage $2
   cd ..
 }
 
-make_guest_kernel() {
-  get_kernel
-  build_kernel $2 $CPUS
-  install_kernel $1
+make_kernel() {
+  get_kernel     linux-$KVER
+  build_kernel   linux-$KVER $2 $CPUS
+  install_kernel linux-$KVER $1
 }
 
 source $(dirname $0)/opts_parse.sh
 
-make_guest_kernel $TMP_DIR $2
+if test -e $TMP_DIR;
+ then
+  echo $TMP_DIR already exists
+ else
+  make_kernel $TMP_DIR $2
+ fi
 mkdir -p $OUT_DIR
 mv $TMP_DIR/bzImage $OUT_DIR
 

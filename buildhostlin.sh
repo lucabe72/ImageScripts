@@ -32,16 +32,16 @@ build_kernel() {
 }
 
 install_kernel() {
-  cd linux-$KVER
-  make INSTALL_MOD_PATH=$1 modules_install
-  cp arch/x86/boot/bzImage $1
+  cd $1
+  make INSTALL_MOD_PATH=$2 modules_install
+  cp arch/x86/boot/bzImage $2
   cd ..
 }
 
-make_host_kernel() {
-  get_kernel   linux-$KVER
-  build_kernel linux-$KVER $2 $CPUS
-  install_kernel $1
+make_kernel() {
+  get_kernel     linux-$KVER
+  build_kernel   linux-$KVER $2 $CPUS
+  install_kernel linux-$KVER $1
 }
 
 source $(dirname $0)/opts_parse.sh
@@ -50,7 +50,7 @@ if test -e $TMP_DIR;
  then
   echo $TMP_DIR already exists
  else
-  make_host_kernel $TMP_DIR $2
+  make_kernel $TMP_DIR $2
  fi
 mkdir -p $OUT_DIR
 mv $TMP_DIR/bzImage $OUT_DIR
