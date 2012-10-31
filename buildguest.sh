@@ -25,7 +25,6 @@ get_kernel() {
 
 build_kernel() {
   cd linux-$KVER
-echo  cp $1 .config
   cp $1 .config
   make oldconfig
   make -j $2
@@ -40,9 +39,7 @@ install_kernel() {
 }
 
 make_guest_kernel() {
-echo Make guest $1 $2
   get_kernel
-echo build
   build_kernel $2 $CPUS
   install_kernel $1
 }
@@ -83,8 +80,6 @@ if [[ x$4 != x ]];
   sudo cp $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot
   sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz
   sudo cp $GUEST_IMG /mnt/home/vrouter/Net
-echo umounting
   sudo umount /mnt
-echo umounted
   sudo /sbin/losetup -d /dev/loop0
  fi
