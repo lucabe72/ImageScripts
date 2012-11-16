@@ -6,7 +6,7 @@ OUT_DIR=$PWD/Out/Host
 TMP_DIR=/tmp/BuildHost
 KVER=3.4.14
 
-source $(dirname $0)/utils.sh
+. $(dirname $0)/utils.sh
 
 get_kernel() {
   if test -e linux-$KVER;

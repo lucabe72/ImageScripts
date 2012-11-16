@@ -5,7 +5,7 @@ TARGET_PATH=/home/vrouter
 TMP_DIR=/tmp/Click
 OUT_DIR=$PWD/Out
 
-source $(dirname $0)/utils.sh
+. $(dirname $0)/utils.sh
 
 get_kernel() {
   if test -e linux-3.0.36;

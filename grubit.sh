@@ -3,7 +3,7 @@ set -e
 CPUS=8
 KVER=3.4.14
 
-source $(dirname $0)/utils.sh
+. $(dirname $0)/utils.sh
 
 get_grub() {
   if test -e grub-0.97;

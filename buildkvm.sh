@@ -5,7 +5,7 @@ CPUS=8
 TMP_DIR=/tmp/KVM
 SCRIPTS_REPO=http://www.disi.unitn.it/~abeni/PublicGits/Sfingi/VRouter-Scripts.git
 
-source $(dirname $0)/utils.sh
+. $(dirname $0)/utils.sh
 
 get_scripts() {
   if test -e VRouter-Scripts;
