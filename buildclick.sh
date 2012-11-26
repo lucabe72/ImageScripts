@@ -130,5 +130,5 @@ sudo rm -rf $TMP_DIR/tmproot/lib/modules/*
 sudo cp -r  $TMP_DIR/lib/modules/* $TMP_DIR/tmproot/lib/modules
 mk_initramfs $TMP_DIR/tmproot $OUT_DIR/core.gz
 
-cp $2 $OUT_DIR/opt1.img
-update_home $OUT_DIR/opt1.img $TMP_DIR$TARGET_PATH
+cp $2 $OUT_DIR/opt2.img
+update_home $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
