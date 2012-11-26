@@ -66,8 +66,8 @@ strip_click() {
   rm -rf $1/include
   rm $1/lib/*.a
   rm -rf $1/share/man
-  strip $1/bin/*
-  strip $1/sbin/*
+  strip $1/bin/* || echo cannot strip some scripts - see errors
+  strip $1/sbin/* || echo cannot strip some scripts - see errors
 }
 
 update_home() {
