@@ -82,6 +82,7 @@ update_home() {
    fi
 
   sudo cp -a $2 mnt$TARGET_PATH
+  sudo cp -a Click mnt$TARGET_PATH
 
   sudo umount mnt
   rm -rf mnt
@@ -104,7 +105,7 @@ ifconfig eth1 up
 /home/vrouter/sbin/click-install /home/vrouter/Click/LB_withoutarpmodule_1in1ex1phyeth1R_sched.click
 EOF
   chmod +x /tmp/bootlocal.sh
-  sudo cp /tmp/bootlocal.sh /mnt/opt/bootlocal.sh
+  sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
 
   sudo umount mnt
   rm -rf mnt
