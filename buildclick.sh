@@ -88,6 +88,29 @@ update_home() {
   sudo /sbin/losetup -d /dev/loop0
 }
 
+update_opt() {
+  mkdir mnt
+  mount_partition $1 img1 mnt
+
+  if test -e mnt/opt
+   then
+    echo Opt already exists
+   else
+    sudo mkdir -p mnt/opt
+   fi
+  cat > /tmp/bootlocal.sh << EOF
+ifconfig eth0 up 
+ifconfig eth1 up
+/home/vrouter/sbin/click-install /home/vrouter/Click/LB_withoutarpmodule_1in1ex1phyeth1R_sched.click
+EOF
+  chmod +x /tmp/bootlocal.sh
+  sudo cp /tmp/bootlocal.sh /mnt/opt/bootlocal.sh
+
+  sudo umount mnt
+  rm -rf mnt
+  sudo /sbin/losetup -d /dev/loop0
+}
+
 get_libs() {
   APPS_BIN="click"
   APPS_SBIN="click-install click-uninstall"
@@ -132,3 +155,18 @@ mk_initramfs $TMP_DIR/tmproot $OUT_DIR/core.gz
 
 cp $2 $OUT_DIR/opt2.img
 update_home $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
+update_opt $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
+
+if [[ x$4 != x ]];
+ then
+  mount_partition $4 img5 /mnt
+  sudo mkdir -p /mnt/home/vrouter/Net/Core/boot
+  sudo cp $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot/core-lb.gz
+  sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz-lb
+  sudo cp $3 /mnt/home/vrouter/Net
+echo umounting
+  sudo umount /mnt
+echo umounted
+  sudo /sbin/losetup -d /dev/loop0
+ fi
+
