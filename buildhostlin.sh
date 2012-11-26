@@ -68,7 +68,7 @@ sudo rm -rf $TMP_DIR/tmproot/lib/modules/*
 sudo cp -r  $TMP_DIR/lib/modules/* $TMP_DIR/tmproot/lib/modules
 mk_initramfs $TMP_DIR/tmproot $OUT_DIR/core.gz
 
-if [[ x$3 != x ]];
+if [ x$3 != x ];
  then
   echo copying to image...
   mount_partition $3 img1 /mnt
