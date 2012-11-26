@@ -28,7 +28,9 @@ get_click() {
     echo click already exists
    else
     git clone git://read.cs.ucla.edu/git/click
+    cd click
     git checkout -b test1 003061d8180c711f6c78b5395584772c1175205e
+    cd ..
    fi
 }
 
