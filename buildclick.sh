@@ -3,7 +3,7 @@ set -e
 CPUS=8
 TARGET_PATH=/home/vrouter
 TMP_DIR=/tmp/Click
-OUT_DIR=$PWD/Out
+OUT_DIR=$PWD/Out/Click
 
 . $(dirname $0)/utils.sh
 
