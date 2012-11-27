@@ -74,7 +74,7 @@ EOF
   sudo /sbin/losetup -d /dev/loop0
  fi
 
-if [ x$4 -ne x ];
+if [ x$4 != x ];
  then
   mount_partition $4 img5 /mnt
   sudo mkdir -p /mnt/home/vrouter/Net/Core/boot
