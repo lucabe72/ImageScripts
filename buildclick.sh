@@ -164,7 +164,7 @@ if [[ x$4 != x ]];
   sudo mkdir -p /mnt/home/vrouter/Net/Core/boot
   sudo cp $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot/core-lb.gz
   sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz-lb
-  sudo cp $3 /mnt/home/vrouter/Net
+  sudo cp $OUT_DIR/opt2.img /mnt/home/vrouter/Net
 echo umounting
   sudo umount /mnt
 echo umounted
