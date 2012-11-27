@@ -56,7 +56,7 @@ sudo rm -rf $TMP_DIR/tmproot/lib/modules/*
 sudo cp -r  $TMP_DIR/lib/modules/* $TMP_DIR/tmproot/lib/modules
 mk_initramfs $TMP_DIR/tmproot $OUT_DIR/core.gz
 
-if [[ x$3 != x ]];
+if [ x$3 != x ];
  then
   GUEST_IMG=$3
   mount_partition $GUEST_IMG img1 /mnt
@@ -74,7 +74,7 @@ EOF
   sudo /sbin/losetup -d /dev/loop0
  fi
 
-if [[ x$4 != x ]];
+if [ x$4 -ne x ];
  then
   mount_partition $4 img5 /mnt
   sudo mkdir -p /mnt/home/vrouter/Net/Core/boot

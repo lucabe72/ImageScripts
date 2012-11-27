@@ -158,7 +158,7 @@ cp $2 $OUT_DIR/opt2.img
 update_home $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
 update_opt $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
 
-if [[ x$4 != x ]];
+if [ x$4 != x ];
  then
   mount_partition $4 img5 /mnt
   sudo mkdir -p /mnt/home/vrouter/Net/Core/boot
