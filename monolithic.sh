@@ -7,10 +7,11 @@ HOST_CONFIG=config-3.4-host-32
 export HOST_ARCH=x86
 export GUEST_ARCH=x86
 
-while getopts 4 opt
+while getopts 48 opt
  do
   case "$opt" in
     4)		HOST_ARCH=x86_64; HOST_CONFIG=config-3.4-host-64;;
+    8)		GUEST_ARCH=x86_64; GUEST_CONFIG=config-3.4-guest-64;;
     [?])	print >&2 "Usage: $0 [-4]"
 		exit 1;;
   esac

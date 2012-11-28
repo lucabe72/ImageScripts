@@ -1,6 +1,6 @@
 set -e
 
-source $(dirname $0)/utils.sh
+. $(dirname $0)/utils.sh
 
 image_create() {
   echo Creating $1 - size $2MB...
@@ -9,7 +9,7 @@ image_create() {
 
 partitions_create() {
   echo Creating partitions on $1... - sizes $3
-  if [[ $2 = $3 ]];
+  if [ $2 -eq $3 ];
    then
     /sbin/sfdisk $1  << EOF
 ;
@@ -31,7 +31,7 @@ EOF
 INAME=$1
 ISIZE=$2
 PSIZE=$3
-if [[ x$PSIZE = x ]];
+if [ x$PSIZE = x ];
  then
   PSIZE=$2
  fi
@@ -49,7 +49,7 @@ echo Cleaning up...
 sudo umount /mnt
 sudo /sbin/losetup -d /dev/loop0
 
-if [[ $PSIZE != $ISIZE ]];
+if [ $PSIZE -ne $ISIZE ];
  then
   echo Formatting 5
   format_partition $INAME 5

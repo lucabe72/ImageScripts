@@ -6,8 +6,8 @@ OUT_DIR=$PWD/Out/Guest
 TMP_DIR=/tmp/BuildGuest
 KVER=3.4.14
 
-source $(dirname $0)/utils.sh
-source $(dirname $0)/opts_parse.sh
+. $(dirname $0)/utils.sh
+. $(dirname $0)/opts_parse.sh
 
 if test -e $TMP_DIR;
  then
@@ -21,7 +21,7 @@ mv $TMP_DIR/bzImage $OUT_DIR
 update_initramfs $1 $TMP_DIR $OUT_DIR
 
 #$3: Guest image -> Configure the net
-if [[ x$3 != x ]];
+if [ x$3 != x ];
  then
   GUEST_IMG=$3
   mount_partition $GUEST_IMG img1 /mnt
@@ -40,7 +40,7 @@ EOF
  fi
 
 #$4: Host image -> Install guest image and stuff in /home/vrouter
-if [[ x$4 != x ]];
+if [ x$4 != x ];
  then
   mount_partition $4 img5 /mnt
   sudo mkdir -p /mnt/home/vrouter/Net/Core/boot

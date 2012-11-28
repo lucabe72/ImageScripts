@@ -5,7 +5,7 @@ CPUS=8
 TMP_DIR=/tmp/KVM
 SCRIPTS_REPO=http://www.disi.unitn.it/~abeni/PublicGits/Sfingi/VRouter-Scripts.git
 
-source $(dirname $0)/utils.sh
+. $(dirname $0)/utils.sh
 
 get_scripts() {
   if test -e VRouter-Scripts;
@@ -72,7 +72,7 @@ make_kvm() {
   build_kvm /home/$VRUSER/Public-KVM-Test $CPUS
   install_kvm $1
   MY_ARCH=$(/bin/arch)
-  if [[ $MY_ARCH = x86_64 ]];
+  if [ $MY_ARCH = x86_64 ];
    then
     get_libs64 $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER qemu-system-x86_64
    else

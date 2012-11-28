@@ -2,11 +2,11 @@ set -e
 
 CPUS=8
 TARGET_PATH=/home/vrouter
-OUT_DIR=$PWD/Out/Click
 TMP_DIR=/tmp/Click
 KVER=3.0.36
+OUT_DIR=$PWD/Out/Click
 
-source $(dirname $0)/utils.sh
+. $(dirname $0)/utils.sh
 
 get_click() {
   if test -e click;
@@ -14,7 +14,9 @@ get_click() {
     echo click already exists
    else
     git clone git://read.cs.ucla.edu/git/click
+    cd click
     git checkout -b test1 003061d8180c711f6c78b5395584772c1175205e
+    cd ..
    fi
 }
 
@@ -35,8 +37,8 @@ strip_click() {
   rm -rf $1/include
   rm $1/lib/*.a
   rm -rf $1/share/man
-  strip $1/bin/*
-  strip $1/sbin/*
+  strip $1/bin/* || echo cannot strip some scripts - see errors
+  strip $1/sbin/* || echo cannot strip some scripts - see errors
 }
 
 update_home() {
@@ -51,6 +53,30 @@ update_home() {
    fi
 
   sudo cp -a $2 mnt$TARGET_PATH
+  sudo cp -a Click mnt$TARGET_PATH
+
+  sudo umount mnt
+  rm -rf mnt
+  sudo /sbin/losetup -d /dev/loop0
+}
+
+update_opt() {
+  mkdir mnt
+  mount_partition $1 img1 mnt
+
+  if test -e mnt/opt
+   then
+    echo Opt already exists
+   else
+    sudo mkdir -p mnt/opt
+   fi
+  cat > /tmp/bootlocal.sh << EOF
+ifconfig eth0 up 
+ifconfig eth1 up
+/home/vrouter/sbin/click-install /home/vrouter/Click/LB_withoutarpmodule_1in1ex1phyeth1R_sched.click
+EOF
+  chmod +x /tmp/bootlocal.sh
+  sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
 
   sudo umount mnt
   rm -rf mnt
@@ -99,5 +125,20 @@ sudo rm -rf $TMP_DIR/tmproot/lib/modules/*
 sudo cp -r  $TMP_DIR/lib/modules/* $TMP_DIR/tmproot/lib/modules
 mk_initramfs $TMP_DIR/tmproot $OUT_DIR/core.gz
 
-cp $2 $OUT_DIR/opt1.img
-update_home $OUT_DIR/opt1.img $TMP_DIR$TARGET_PATH
+cp $2 $OUT_DIR/opt2.img
+update_home $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
+update_opt $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
+
+if [ x$4 != x ];
+ then
+  mount_partition $4 img5 /mnt
+  sudo mkdir -p /mnt/home/vrouter/Net/Core/boot
+  sudo cp $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot/core-lb.gz
+  sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz-lb
+  sudo cp $OUT_DIR/opt2.img /mnt/home/vrouter/Net
+echo umounting
+  sudo umount /mnt
+echo umounted
+  sudo /sbin/losetup -d /dev/loop0
+ fi
+
