@@ -1,3 +1,4 @@
+GUEST_ARCH=x86
 GUEST_CONFIG=config-3.0.36-guest-32
 
 while getopts 4 opt
@@ -11,5 +12,5 @@ while getopts 4 opt
 
 sh monolithic.sh -4
 sh create_image.sh opt2.img 48
-export ARCH=$(GUEST_ARCH)
-sh buildclick.sh $(pwd)/core.gz $(pwd)/opt2.img $(pwd)/Configs/$(GUEST_CONFIG) test.img
+export ARCH=$GUEST_ARCH
+sh buildclick.sh $(pwd)/core.gz $(pwd)/opt2.img $(pwd)/Configs/$GUEST_CONFIG test.img
