@@ -1,12 +1,14 @@
 set -e
 
 CPUS=8
+SDIR=$(cd -- $(dirname $0) && pwd)
 TARGET_PATH=/home/vrouter
 TMP_DIR=/tmp/Click
 KVER=3.0.36
 OUT_DIR=$PWD/Out/Click
 
 . $(dirname $0)/utils.sh
+. $(dirname $0)/opts_parse.sh
 
 get_click() {
   if test -e click;
@@ -53,7 +55,7 @@ update_home() {
    fi
 
   sudo cp -a $2 mnt$TARGET_PATH
-  sudo cp -a Click mnt$TARGET_PATH
+  sudo cp -a $SDIR/Click mnt$TARGET_PATH
 
   sudo umount mnt
   rm -rf mnt
