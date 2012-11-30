@@ -9,9 +9,9 @@ KVER=3.4.14
 . $(dirname $0)/utils.sh
 . $(dirname $0)/opts_parse.sh
 
-if test -e $TMP_DIR;
+if test -e $TMP_DIR/bzImage;
  then
-  echo $TMP_DIR already exists
+  echo $TMP_DIR/bzImage already exists
  else
   make_kernel $TMP_DIR $2
  fi
