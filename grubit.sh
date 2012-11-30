@@ -5,6 +5,7 @@ KVER=3.4.14
 TMP_DIR=/tmp/GRUB
 
 . $(dirname $0)/utils.sh
+. $(dirname $0)/opts_parse.sh
 
 get_grub() {
   if test -e grub-0.97;
