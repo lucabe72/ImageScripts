@@ -22,4 +22,4 @@ if [ $MY_ARCH = x86_64 ];
   ARCH=x86
  fi
 export ARCH
-sh $SDIR/buildclick.sh $SDIR/core.gz $(pwd)/opt2.img $SDIR/Configs/$GUEST_CONFIG test.img
+sh $SDIR/buildclick.sh $SDIR/core.gz $SDIR/Configs/$GUEST_CONFIG $(pwd)/opt2.img test.img

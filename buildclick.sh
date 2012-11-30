@@ -107,9 +107,7 @@ get_libs() {
 }
 
 make_click_kernel() {
-  get_kernel     linux-$KVER
-  build_kernel   linux-$KVER $2 $CPUS
-  install_kernel linux-$KVER $1
+  make_kernel $TMP_DIR $2
   get_click
   build_click $TARGET_PATH $CPUS
   install_click $1
@@ -118,16 +116,13 @@ make_click_kernel() {
 }
 
 
-make_click_kernel $TMP_DIR $3
+make_click_kernel $TMP_DIR $2
 mkdir -p $OUT_DIR
 mv $TMP_DIR/bzImage $OUT_DIR
 
-extract_initramfs $1  $TMP_DIR/tmproot
-sudo rm -rf $TMP_DIR/tmproot/lib/modules/*
-sudo cp -r  $TMP_DIR/lib/modules/* $TMP_DIR/tmproot/lib/modules
-mk_initramfs $TMP_DIR/tmproot $OUT_DIR/core.gz
+update_initramfs $1 $TMP_DIR $OUT_DIR
 
-cp $2 $OUT_DIR/opt2.img
+cp $3 $OUT_DIR/opt2.img
 update_home $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
 update_opt $OUT_DIR/opt2.img $TMP_DIR$TARGET_PATH
 
