@@ -10,7 +10,7 @@ INSTALLED=""
 addUser(){
 	echo "${GREEN}Adding user ${YELLOW} $USER ${NORMAL}"
 	/bin/adduser -s /bin/sh -G staff -D "$USER"
-	echo "$USER":tcuser | /usr/sbin/chpasswd -m
+	echo "$USER":tcuser | /sbin/chpasswd -m
 	echo -e "$USER\tALL=NOPASSWD: ALL" >> /etc/sudoers
 	setupHome
 }
@@ -72,7 +72,6 @@ for i in `cat /proc/cmdline`; do
 				aoe* ) AOE=${i#*=} ;;
 				nbd* ) NBD=${i#*=} ;;
 				mydata* ) MYDATA=${i#*=} ;;
-				pretce* ) PRETCE=${i#*=} ;;
 				xvesa* ) XVESA=${i#*=} ;;
 				rsyslog=* ) RSYSLOG=${i#*=}; SYSLOG=1 ;;
 				blacklist* ) BLACKLIST="$BLACKLIST ${i#*=}" ;;
@@ -157,7 +156,7 @@ if [ -n "$NOFSTAB" ]; then
 else
 	echo "${BLUE}Scanning hard disk partitions to create ${YELLOW}/etc/fstab ${NORMAL}"
 	modprobe scsi_wait_scan 2>/dev/null
-	/usr/sbin/rebuildfstab & fstab_pid=$!
+	/sbin/rebuildfstab & fstab_pid=$!
 #	mv /tmp/98-tc.rules /etc/udev/rules.d/. 2>/dev/null
 #	/sbin/udevadm control --reload-rules &
 fi
@@ -224,19 +223,6 @@ fi
 mkdir -p /home/"$USER"
     	   
 # Preload drivers needed for tce/opt/home on lvm/RAID etc
-if [ -n "$PRETCE" ]; then
-	PPATH=${PRETCE%%/*}
-	mkdir -p /mnt/$PPATH
-	mount /dev/$PPATH /mnt/$PPATH
-	[ -f /mnt/$PRETCE/copy2fs.flg ] && CPTOFS=1
-	while read NAME
-	do
-		[ "$CPTOFS" ] || grep -q $NAME /mnt/$PRETCE/copy2fs.lst && FL="-c" || FL=''
-		su "$USER" -c "/usr/bin/tce-load -i $FL /mnt/$PRETCE/optional/$NAME"
-	done < /mnt/$PRETCE/onboot.lst
-	umount /mnt/$PPATH 2>/dev/null
-fi
-
 unset HOME_SETUP
 if [ -n "$MYHOME" ]; then
 	wait $fstab_pid
