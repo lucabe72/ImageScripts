@@ -60,9 +60,10 @@ mk_initramfs() {
 update_initramfs()
 {
   extract_initramfs $1  $2/tmproot
-  sudo rm -rf  $2/tmproot/lib/modules/*
-  sudo cp -r   $2/lib/modules/* $2/tmproot/lib/modules
-  mk_initramfs $2/tmproot $3/core.gz
+  sudo rm -rf   $2/tmproot/lib/modules/*
+  sudo mkdir -p $2/tmproot/lib/modules
+  sudo cp -r    $2/lib/modules/* $2/tmproot/lib/modules
+  mk_initramfs  $2/tmproot $3/core.gz
 }
 
 get_kernel() {
