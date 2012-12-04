@@ -65,6 +65,7 @@ mv $TMP_DIR/bzImage $OUT_DIR
 
 extract_initramfs $1  $TMP_DIR/tmproot
 sudo rm -rf $TMP_DIR/tmproot/lib/modules/*
+sudo mkdir -p $TMP_DIR/tmproot/lib/modules
 sudo cp -r  $TMP_DIR/lib/modules/* $TMP_DIR/tmproot/lib/modules
 mk_initramfs $TMP_DIR/tmproot $OUT_DIR/core.gz
 

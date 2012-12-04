@@ -56,5 +56,3 @@ mk_initramfs() {
   sudo find . | sudo cpio -o -H newc | gzip > $2
   cd $HERE
 }
-
-
