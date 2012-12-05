@@ -6,12 +6,16 @@ get_exec_libs() {
   LD_LINUX=$(strings $1 | grep ld-linux)
   for L in $LIBS
    do
-    cp $L $2/$(dirname $L)
+    DIR=$(dirname $L | cut -f 2 -d '/')
+    cp $L $2/$DIR
    done
   cp $LD_LINUX $2/$(dirname $LD_LINUX)
 }
 
-
+fetch_lib() {
+  LIB=$(find $1 -name $2)
+  cp $LIB $3/$1
+}
 
 tar xvjf busybox-1.20.2.tar.bz2
 cd busybox-1.20.2
@@ -39,10 +43,12 @@ rm -rf /tmp/S
 make DESTDIR=/tmp/S install
 cp /tmp/S/bin/sudo ../busybox-1.20.2/_install/bin
 get_exec_libs ../busybox-1.20.2/_install/bin/sudo ../busybox-1.20.2/_install
-cp /lib64/libnss_compat.so.2 ../busybox-1.20.2/_install/lib64
-cp /lib64/libnss_files.so.2 ../busybox-1.20.2/_install/lib64
-cp /lib/libnss_compat.so.2 ../busybox-1.20.2/_install/lib
-cp /lib/libnss_files.so.2 ../busybox-1.20.2/_install/lib
+
+fetch_lib /lib libnss_compat* ../busybox-1.20.2/_install
+fetch_lib /lib libnss_files* ../busybox-1.20.2/_install
+fetch_lib /lib64 libnss_compat* ../busybox-1.20.2/_install
+fetch_lib /lib libnss_files* ../busybox-1.20.2/_install
+
 cd ..
 
 
