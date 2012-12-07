@@ -54,7 +54,7 @@ setup (hd0)
 EOF
 }
 
-source $(dirname $0)/opts_parse.sh
+. $(dirname $0)/opts_parse.sh
 
 get_grub
 build_grub $TMP_DIR $CPUS

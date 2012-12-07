@@ -72,7 +72,7 @@ make_kvm() {
   get_kvm
   build_kvm /home/$VRUSER/Public-KVM-Test $CPUS
   install_kvm $1
-  MY_ARCH=$(/bin/arch)
+  MY_ARCH=$(arch)
   if [ $MY_ARCH = x86_64 ];
    then
     get_libs64 $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER qemu-system-x86_64
