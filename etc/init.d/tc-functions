@@ -64,21 +64,9 @@ find_mountpoint() {
  MOUNTPOINT=""
  MOUNTED="no"
  D2="$1"
- if [ "$D2" == "nfs" ]; then
-    MOUNTPOINT=/mnt/nfs
-    MOUNTED="yes"
-    return
- fi
- if [ "${D2:0:5}" == "UUID=" ]; then
-   D2=`/sbin/blkid -lt $D2 -o device`
-   if [ "$?" != 0 ]; then
-     MOUNTPOINT=""
-     return
-   else
-     D2="${D2%%:*}"
-   fi
- elif [ "${D2:0:6}" == "LABEL=" ]; then
-   D2=`/sbin/blkid -lt $D2 -o device`
+ if [ "${D2:0:6}" == "LABEL=" ]; then
+   LABEL=$(echo $D2 | cut -d '=' -f 2)
+   D2=$(/sbin/blkid | grep LABEL= | grep $LABEL | cut -d ':' -f 1) 
    if [ "$?" != 0 ]; then
      MOUNTPOINT=""
      return
@@ -92,15 +80,6 @@ find_mountpoint() {
  if [ -n "$MOUNTPOINT" ]; then
    MOUNTED="yes"
    return
- fi
- 
-# Special case for virtual disk 
- if [ "$D2" == "/dev/tcvd" ]; then
-   MOUNTPOINT="$(awk '/\/mnt\/tcvd/{print $2}' /etc/mtab|head -n 1)"
-   if [ -n "$MOUNTPOINT" ]; then
-     MOUNTED="yes"
-     return
-   fi
  fi
 
  MOUNTPOINT="$(grep -i ^$D2\  /etc/fstab|awk '{print $2}'|head -n 1)"
