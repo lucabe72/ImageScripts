@@ -29,6 +29,7 @@ mkdir /sys
 mkdir /tmp
 mkdir /home
 mkdir /root
+mkdir /opt
 mkdir -p /dev/pts
 mkdir -p /dev/shm
 mkdir -p /var/run
