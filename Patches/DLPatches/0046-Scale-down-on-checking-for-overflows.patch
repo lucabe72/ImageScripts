@@ -1,0 +1,39 @@
+From 34d9d8e6f446b21e33b905d47442416475b8a73f Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Tue, 20 Nov 2012 18:20:57 -0800
+Subject: [PATCH 46/48] Scale down on checking for overflows
+
+Scale operands down by a factor of ten (microseconds granularity)
+as to not risk an u64 overflow at dl_entity_overflow.
+---
+ kernel/sched/deadline.c |   13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/kernel/sched/deadline.c b/kernel/sched/deadline.c
+index 6b9879b..2863297 100644
+--- a/kernel/sched/deadline.c
++++ b/kernel/sched/deadline.c
+@@ -376,11 +376,16 @@ static bool dl_entity_overflow(struct sched_dl_entity *dl_se,
+ 	 * are the relative deadline and the maximum runtime of each
+ 	 * instance, runtime is the runtime left for the last instance
+ 	 * and (deadline - t), since t is rq->clock, is the time left
+-	 * to the (absolute) deadline. Therefore, overflowing the u64
+-	 * type is very unlikely to occur in both cases.
++	 * to the (absolute) deadline. Even if overflowing the u64 type
++	 * is very unlikely to occur in both cases, here we scale down
++	 * as we want to avoid that risk at all. Scaling down by 10
++	 * means that we reduce granularity to 1us. We are fine with it,
++	 * since this is only a true/false check and, anyway, thinking
++	 * of anything below microseconds resolution is actually fiction
++	 * (but still we want to give the user that illusion >;).
+ 	 */
+-	left = pi_se->dl_period * dl_se->runtime;
+-	right = (dl_se->deadline - t) * pi_se->dl_runtime;
++	left = (pi_se->dl_period >> 10) * (dl_se->runtime >> 10);
++	right = ((dl_se->deadline - t) >> 10) * (pi_se->dl_runtime >> 10);
+ 
+ 	return dl_time_before(right, left);
+ }
+-- 
+1.7.9.5
+

@@ -1,0 +1,27 @@
+From 75d8882002dd01842ad2f6fc1ef57824e5ace041 Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Mon, 21 May 2012 15:42:47 +0200
+Subject: [PATCH 27/48] dl: double unlock balance inside find lock rq.
+
+Same problem addressed here:
+https://lkml.org/lkml/2012/5/17/334
+---
+ kernel/sched/dl.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/kernel/sched/dl.c b/kernel/sched/dl.c
+index 0360d4d..56041c5 100644
+--- a/kernel/sched/dl.c
++++ b/kernel/sched/dl.c
+@@ -1209,7 +1209,7 @@ static struct rq *find_lock_later_rq(struct task_struct *task, struct rq *rq)
+ 						       &task->cpus_allowed) ||
+ 				     task_running(rq, task) ||
+ 				     !task->on_rq)) {
+-				raw_spin_unlock(&later_rq->lock);
++				double_unlock_balance(rq, later_rq);
+ 				later_rq = NULL;
+ 				break;
+ 			}
+-- 
+1.7.9.5
+

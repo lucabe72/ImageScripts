@@ -1,0 +1,74 @@
+From 3213a882a7f06eb9732748371c900cdff65bd134 Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Wed, 21 Nov 2012 10:58:29 -0800
+Subject: [PATCH 47/48] Check that user params are above granularity
+
+---
+ kernel/sched/core.c     |    9 ++++++---
+ kernel/sched/deadline.c |    5 +++--
+ kernel/sched/sched.h    |    7 +++++++
+ 3 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/kernel/sched/core.c b/kernel/sched/core.c
+index b1eff9d..0610888 100644
+--- a/kernel/sched/core.c
++++ b/kernel/sched/core.c
+@@ -3875,15 +3875,18 @@ __getparam_dl(struct task_struct *p, struct sched_param2 *param2)
+  * This function validates the new parameters of a -deadline task.
+  * We ask for the deadline not being zero, and greater or equal
+  * than the runtime, as well as the period of being zero or
+- * greater than deadline.
++ * greater than deadline. Furthermore, we have to be sure that
++ * user parameters are above the internal resolution (1us); we
++ * check sched_runtime only since it is always the smaller one.
+  */
+ static bool
+ __checkparam_dl(const struct sched_param2 *prm)
+ {
+ 	return prm && prm->sched_deadline != 0 &&
+ 	       (prm->sched_period == 0 ||
+-		(s64)(prm->sched_period - prm->sched_deadline) >= 0) &&
+-	       (s64)(prm->sched_deadline - prm->sched_runtime) >= 0;
++	       (s64)(prm->sched_period - prm->sched_deadline) >= 0) &&
++	       (s64)(prm->sched_deadline - prm->sched_runtime) >= 0 &&
++	       prm->sched_runtime >= (2 << (DL_SCALE - 1));
+ }
+ 
+ /*
+diff --git a/kernel/sched/deadline.c b/kernel/sched/deadline.c
+index 2863297..96e5430 100644
+--- a/kernel/sched/deadline.c
++++ b/kernel/sched/deadline.c
+@@ -384,8 +384,9 @@ static bool dl_entity_overflow(struct sched_dl_entity *dl_se,
+ 	 * of anything below microseconds resolution is actually fiction
+ 	 * (but still we want to give the user that illusion >;).
+ 	 */
+-	left = (pi_se->dl_period >> 10) * (dl_se->runtime >> 10);
+-	right = ((dl_se->deadline - t) >> 10) * (pi_se->dl_runtime >> 10);
++	left = (pi_se->dl_period >> DL_SCALE) * (dl_se->runtime >> DL_SCALE);
++	right = ((dl_se->deadline - t) >> DL_SCALE) *
++		(pi_se->dl_runtime >> DL_SCALE);
+ 
+ 	return dl_time_before(right, left);
+ }
+diff --git a/kernel/sched/sched.h b/kernel/sched/sched.h
+index 4599a95..d0b3a61 100644
+--- a/kernel/sched/sched.h
++++ b/kernel/sched/sched.h
+@@ -44,6 +44,13 @@ extern __read_mostly int scheduler_running;
+  */
+ #define RUNTIME_INF	((u64)~0ULL)
+ 
++/*
++ * Single value that decides SCHED_DEADLINE internal math precision.
++ * 10 -> just above 1us
++ * 9  -> just above 0.5us
++ */
++#define DL_SCALE (10)
++
+ static inline int rt_policy(int policy)
+ {
+ 	if (policy == SCHED_FIFO || policy == SCHED_RR)
+-- 
+1.7.9.5
+

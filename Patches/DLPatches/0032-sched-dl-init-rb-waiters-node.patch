@@ -1,0 +1,42 @@
+From d7d41f1db7b44cfe5ea78746b8412f18b8ee3c81 Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Fri, 20 Jul 2012 17:41:51 +0200
+Subject: [PATCH 32/48] sched-dl: init rb waiters node
+
+rt_mutex_init_waiter has been removed. The initialization bits for
+rb waiter nodes must be moved somewhere else (for now they are
+repeated in the previous calling points).
+---
+ kernel/futex.c   |    2 ++
+ kernel/rtmutex.c |    2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/kernel/futex.c b/kernel/futex.c
+index 20ef219..f5b04b5 100644
+--- a/kernel/futex.c
++++ b/kernel/futex.c
+@@ -2297,6 +2297,8 @@ static int futex_wait_requeue_pi(u32 __user *uaddr, unsigned int flags,
+ 	 */
+ 	debug_rt_mutex_init_waiter(&rt_waiter);
+ 	rt_waiter.task = NULL;
++	rb_init_node(&rt_waiter.tree_entry);
++	rb_init_node(&rt_waiter.pi_tree_entry);
+ 
+ 	ret = get_futex_key(uaddr2, flags & FLAGS_SHARED, &key2, VERIFY_WRITE);
+ 	if (unlikely(ret != 0))
+diff --git a/kernel/rtmutex.c b/kernel/rtmutex.c
+index 7187c50..2f76bcc 100644
+--- a/kernel/rtmutex.c
++++ b/kernel/rtmutex.c
+@@ -720,6 +720,8 @@ rt_mutex_slowlock(struct rt_mutex *lock, int state,
+ 	int ret = 0;
+ 
+ 	debug_rt_mutex_init_waiter(&waiter);
++	rb_init_node(&waiter.tree_entry);
++	rb_init_node(&waiter.pi_tree_entry);
+ 
+ 	raw_spin_lock(&lock->wait_lock);
+ 
+-- 
+1.7.9.5
+
