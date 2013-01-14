@@ -12,7 +12,7 @@ while getopts 48 opt
 
 sh $SDIR/monolithic.sh $ARCHP
 sh $SDIR/create_image.sh opt2.img 48
-MY_ARCH=$(/bin/arch)
+MY_ARCH=$(arch)
 if [ $MY_ARCH = x86_64 ];
  then
   GUEST_CONFIG=config-3.0.36-guest-64
