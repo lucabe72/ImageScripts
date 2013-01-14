@@ -94,6 +94,16 @@ update_home() {
 
   sudo cp -a $3 mnt/home
 
+  sudo mkdir -p mnt/opt
+  MY_ARCH=$(arch)
+  if [ $MY_ARCH = x86_64 ];
+    cat > /tmp/bootlocal.sh << EOF
+cp -a /home/vrouter/lib64 /
+EOF
+    chmod +x /tmp/bootlocal.sh
+    sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
+  fi
+
   sudo umount mnt
   rm -rf mnt
   sudo /sbin/e2label /dev/loop0 VRouter
