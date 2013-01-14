@@ -72,10 +72,17 @@ update_opt() {
    else
     sudo mkdir -p mnt/opt
    fi
+  MY_ARCH=$(arch)
+  if [ $MY_ARCH = x86_64 ];
+   then
+    LDLP=/home/vrouter/lib64
+   else
+    LDLP=
+   fi
   cat > /tmp/bootlocal.sh << EOF
 ifconfig eth0 up 
 ifconfig eth1 up
-/home/vrouter/sbin/click-install /home/vrouter/Click/LB_withoutarpmodule_1in1ex1phyeth1R_sched.click
+LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LDLP /home/vrouter/sbin/click-install /home/vrouter/Click/LB_withoutarpmodule_1in1ex1phyeth1R_sched.click
 EOF
   chmod +x /tmp/bootlocal.sh
   sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
@@ -106,12 +113,45 @@ get_libs() {
    done
 }
 
+get_libs64() {
+echo Get libs 64
+  APPS_BIN="click"
+  APPS_SBIN="click-install click-uninstall"
+  PROVIDED_LIBS=""
+  LD_LINUX=$(strings $1/bin/click-install | grep ld-linux)
+
+  mkdir -p $1/lib64
+
+  for A in $APPS_BIN
+   do
+    get_exec_libs $1/bin/$A $1/lib64
+   done
+
+  for A in $APPS_SBIN
+   do
+    get_exec_libs $1/sbin/$A $1/lib64
+   done
+
+  for L in $PROVIDED_LIBS
+   do
+    rm $1/lib64/$L*
+   done
+
+  cp $LD_LINUX $2/lib64
+}
+
 make_click_kernel() {
   make_kernel $TMP_DIR $2
   get_click
   build_click $TARGET_PATH $CPUS
   install_click $1
-  get_libs $1$TARGET_PATH
+  MY_ARCH=$(arch)
+  if [ $MY_ARCH = x86_64 ];
+   then
+    get_libs64 $1$TARGET_PATH
+   else
+    get_libs $1$TARGET_PATH
+   fi
   strip_click $1$TARGET_PATH
 }
 
