@@ -97,12 +97,13 @@ update_home() {
   sudo mkdir -p mnt/opt
   MY_ARCH=$(arch)
   if [ $MY_ARCH = x86_64 ];
+   then
     cat > /tmp/bootlocal.sh << EOF
 cp -a /home/vrouter/lib64 /
 EOF
     chmod +x /tmp/bootlocal.sh
     sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
-  fi
+   fi
 
   sudo umount mnt
   rm -rf mnt
