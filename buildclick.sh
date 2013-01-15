@@ -82,6 +82,7 @@ update_opt() {
   cat > /tmp/bootlocal.sh << EOF
 ifconfig eth0 up 
 ifconfig eth1 up
+cp -a /home/vrouter/lib64 /
 LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LDLP /home/vrouter/sbin/click-install /home/vrouter/Click/LB_withoutarpmodule_1in1ex1phyeth1R_sched.click
 EOF
   chmod +x /tmp/bootlocal.sh
