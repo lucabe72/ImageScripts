@@ -23,14 +23,23 @@ get_click() {
 }
 
 build_click() {
-  cd click
-  CC=gcc-4.3 CXX=g++-4.3 ./configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36
+  mkdir -p click-build-us
+  cd click-build-us
+  CC=gcc-4.3 CXX=g++-4.3 ../click/configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36
+  make -j $2
+  cd ..
+  mkdir -p click-build-ks
+  cd click-build-ks
+  ../click/configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36 --disable-userlevel
   make -j $2
   cd ..
 }
 
 install_click() {
-  cd click
+  cd click-build-us
+  DESTDIR=$1 make install
+  cd ..
+  cd click-build-ks
   DESTDIR=$1 make install
   cd ..
 }
