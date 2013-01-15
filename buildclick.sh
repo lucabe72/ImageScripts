@@ -24,7 +24,7 @@ get_click() {
 
 build_click() {
   cd click
-  ./configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36
+  CC=gcc-4.3 CXX=g++-4.3 ./configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36
   make -j $2
   cd ..
 }
