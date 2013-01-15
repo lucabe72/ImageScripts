@@ -118,7 +118,7 @@ echo Get libs 64
   APPS_BIN="click"
   APPS_SBIN="click-install click-uninstall"
   PROVIDED_LIBS=""
-  LD_LINUX=$(strings $1/bin/click-install | grep ld-linux)
+  LD_LINUX=$(strings $1/sbin/click-install | grep ld-linux)
 
   mkdir -p $1/lib64
 
@@ -137,7 +137,7 @@ echo Get libs 64
     rm $1/lib64/$L*
    done
 
-  cp $LD_LINUX $2/lib64
+  cp $LD_LINUX $1/lib64
 }
 
 make_click_kernel() {
