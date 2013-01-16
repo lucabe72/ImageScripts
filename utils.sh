@@ -97,9 +97,13 @@ install_kernel() {
 }
 
 make_kernel() {
-  get_kernel     linux-$KVER
-  build_kernel   linux-$KVER $2 $CPUS
-  install_kernel linux-$KVER $1
+  DIR=linux-$KVER
+  INSTALL_DIR=$1
+  CONFIG_FILE=$2
+
+  get_kernel     $DIR
+  build_kernel   $DIR $CONFIG_FILE $CPUS
+  install_kernel $DIR $INSTALL_DIR
 }
 
 
