@@ -22,24 +22,28 @@ get_click() {
    fi
 }
 
-build_click() {
-  mkdir -p click-build-us
-  cd click-build-us
-  CC=gcc-4.3 CXX=g++-4.3 ../click/configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36
-  make -j $2
+patch_click()
+{
+  PATCHES=$(ls $1)
+
+  cd click
+  for p in $PATCHES
+   do
+    ls $1/$p
+    patch -p1 < $1/$p
+   done
   cd ..
-  mkdir -p click-build-ks
-  cd click-build-ks
-  ../click/configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36 --disable-userlevel
+}
+
+build_click() {
+  cd click
+  ./configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36
   make -j $2
   cd ..
 }
 
 install_click() {
-  cd click-build-us
-  DESTDIR=$1 make install
-  cd ..
-  cd click-build-ks
+  cd click
   DESTDIR=$1 make install
   cd ..
 }
@@ -153,6 +157,7 @@ echo Get libs 64
 make_click_kernel() {
   make_kernel $TMP_DIR $2
   get_click
+  patch_click $SDIR/Patches/click
   build_click $TARGET_PATH $CPUS
   install_click $1
   MY_ARCH=$(arch)
