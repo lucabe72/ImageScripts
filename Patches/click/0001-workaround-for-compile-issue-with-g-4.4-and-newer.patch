@@ -1,0 +1,25 @@
+From eaccfd11f0322e37195fae56d465958c519e6468 Mon Sep 17 00:00:00 2001
+From: Csaba Kiraly <kiraly@disi.unitn.it>
+Date: Thu, 17 Jan 2013 13:00:38 +0100
+Subject: [PATCH] workaround for compile issue with g++ 4.4 and newer
+
+---
+ lib/timer.cc |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/timer.cc b/lib/timer.cc
+index cd9453b..3275a0f 100644
+--- a/lib/timer.cc
++++ b/lib/timer.cc
+@@ -195,7 +195,7 @@ Timer::task_hook(Timer *, void *thunk)
+ Timer::Timer()
+     : _schedpos1(0), _thunk(0), _owner(0), _thread(0)
+ {
+-    static_assert(sizeof(TimerSet::heap_element) == 16, "size_element should be 16 bytes long.");
++    //static_assert(sizeof(TimerSet::heap_element) == 16, "size_element should be 16 bytes long.");
+     _hook.callback = do_nothing_hook;
+ }
+ 
+-- 
+1.7.9.5
+
