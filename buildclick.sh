@@ -22,6 +22,19 @@ get_click() {
    fi
 }
 
+patch_click()
+{
+  PATCHES=$(ls $1)
+
+  cd click
+  for p in $PATCHES
+   do
+    ls $1/$p
+    patch -p1 < $1/$p
+   done
+  cd ..
+}
+
 build_click() {
   cd click
   ./configure --prefix=$1 --with-linux=$PWD/../linux-3.0.36
@@ -144,6 +157,7 @@ echo Get libs 64
 make_click_kernel() {
   make_kernel $TMP_DIR $2
   get_click
+  patch_click $SDIR/Patches/click
   build_click $TARGET_PATH $CPUS
   install_click $1
   MY_ARCH=$(arch)
