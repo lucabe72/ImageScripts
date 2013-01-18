@@ -1,6 +1,5 @@
 set -e
 
-CPUS=8
 SDIR=$(cd -- $(dirname $0) && pwd)
 TARGET_PATH=/home/vrouter
 TMP_DIR=/tmp/Click
@@ -8,6 +7,7 @@ KVER=3.0.36
 OUT_DIR=$PWD/Out/Click
 
 . $(dirname $0)/utils.sh
+CPUS=$(get_j)
 . $(dirname $0)/opts_parse.sh
 
 get_click() {

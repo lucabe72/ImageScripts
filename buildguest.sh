@@ -1,12 +1,12 @@
 set -e
 
-CPUS=8
 TARGET_PATH=/home/vrouter
 OUT_DIR=$PWD/Out/Guest
 TMP_DIR=/tmp/BuildGuest
 KVER=3.4.14
 
 . $(dirname $0)/utils.sh
+CPUS=$(get_j)
 . $(dirname $0)/opts_parse.sh
 
 if test -e $TMP_DIR/bzImage;

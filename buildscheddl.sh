@@ -1,12 +1,12 @@
 set -e
 
-CPUS=8
 TARGET_PATH=/home/vrouter
 OUT_DIR=$PWD/Out/Host
 TMP_DIR=/tmp/BuildHost
 KVER=3.7.1
 
 . $(dirname $0)/utils.sh
+CPUS=$(get_j)
 . $(dirname $0)/opts_parse.sh
 
 patch_kernel()

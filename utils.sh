@@ -28,7 +28,16 @@ format_partition() {
 }
 
 get_cpus() {
-  echo $(grep processor /proc/cpuinfo | tail -n 1) | cut -d ' ' -f 3
+  echo $(grep processor /proc/cpuinfo | wc -l)
+}
+
+get_j() {
+  C=$(get_cpus)
+  if [ $C -ne 1 ]
+   then
+     C=$((C-1))
+   fi
+  echo $C
 }
 
 get_exec_libs() {
