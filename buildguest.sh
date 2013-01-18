@@ -47,6 +47,7 @@ if [ x$4 != x ];
   sudo cp $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot
   sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz
   sudo cp $GUEST_IMG /mnt/home/vrouter/Net
+  sync
   sudo umount /mnt
   sudo /sbin/losetup -d /dev/loop0
  fi
