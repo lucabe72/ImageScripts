@@ -91,15 +91,18 @@ get_kernel() {
 }
 
 build_kernel() {
-  cd $1
+  CFGNAME=$(basename $2)
+  mkdir -p build-$CFGNAME
+  cd       build-$CFGNAME
   cp $2 .config
-  make oldconfig
+  make -C $(pwd)/../$1 O=$(pwd) oldconfig
   make -j $3
   cd ..
 }
 
 install_kernel() {
-  cd $1
+  CFGNAME=$(basename $1)
+  cd build-$CFGNAME
   make INSTALL_MOD_PATH=$2 modules_install
   cp arch/x86/boot/bzImage $2
   cd ..
@@ -112,7 +115,6 @@ make_kernel() {
 
   get_kernel     $DIR
   build_kernel   $DIR $CONFIG_FILE $CPUS
-  install_kernel $DIR $INSTALL_DIR
+  install_kernel $CONFIG_FILE $INSTALL_DIR
 }
-
 
