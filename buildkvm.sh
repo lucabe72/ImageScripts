@@ -105,6 +105,7 @@ EOF
     sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
    fi
 
+  sync
   sudo umount mnt
   rm -rf mnt
   sudo /sbin/e2label /dev/loop0 VRouter

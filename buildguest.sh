@@ -34,6 +34,7 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 EOF
   chmod +x /tmp/bootlocal.sh
   sudo cp /tmp/bootlocal.sh /mnt/opt/bootlocal.sh
+  sync
   sudo umount /mnt
   sleep 1
   sudo /sbin/losetup -d /dev/loop0

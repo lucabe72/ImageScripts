@@ -70,6 +70,7 @@ update_home() {
   sudo cp -a $2 mnt$TARGET_PATH
   sudo cp -a $SDIR/Click mnt$TARGET_PATH
 
+  sync
   sudo umount mnt
   rm -rf mnt
   sudo /sbin/losetup -d /dev/loop0
@@ -101,6 +102,7 @@ EOF
   chmod +x /tmp/bootlocal.sh
   sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
 
+  sync
   sudo umount mnt
   rm -rf mnt
   sudo /sbin/losetup -d /dev/loop0
@@ -189,6 +191,7 @@ if [ x$4 != x ];
   sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz-lb
   sudo cp $OUT_DIR/opt2.img /mnt/home/vrouter/Net
 echo umounting
+  sync
   sudo umount /mnt
 echo umounted
   sudo /sbin/losetup -d /dev/loop0

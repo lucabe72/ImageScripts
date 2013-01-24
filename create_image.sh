@@ -46,6 +46,7 @@ sudo touch /mnt/here
 
 sleep 1
 echo Cleaning up...
+sync
 sudo umount /mnt
 sudo /sbin/losetup -d /dev/loop0
 
