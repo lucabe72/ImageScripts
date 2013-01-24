@@ -127,8 +127,13 @@ make_kernel() {
   DIR=linux-$KVER
   INSTALL_DIR=$1
   CONFIG_FILE=$2
+  PATCH_DIR=$3
 
   get_kernel     $DIR
+  if [ x$PATCH_DIR != x ];
+   then
+    patch_source $PATCH_DIR linux-$KVER
+   fi
   build_kernel   $DIR $CONFIG_FILE $CPUS
   install_kernel $CONFIG_FILE $INSTALL_DIR
 }
