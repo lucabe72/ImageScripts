@@ -113,14 +113,19 @@ patch_source()
   PATCHES=$(ls $1)
   TMP=$(pwd)
 
-  cd $2
-  for p in $PATCHES
-   do
-    ls $TMP/$1/$p
-    patch -p1 < $TMP/$1/$p
-   done
-
-  cd $TMP
+  if test -e $2/.patched;
+   then
+    echo $2 is already patched
+   else
+    cd $2
+    touch .patched
+    for p in $PATCHES
+     do
+      ls $TMP/$1/$p
+      patch -p1 < $TMP/$1/$p
+     done
+    cd $TMP
+   fi
 }
 
 make_kernel() {
