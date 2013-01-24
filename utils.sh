@@ -108,6 +108,21 @@ install_kernel() {
   cd ..
 }
 
+patch_source()
+{
+  PATCHES=$(ls $1)
+  TMP=$(pwd)
+
+  cd $2
+  for p in $PATCHES
+   do
+    ls $TMP/$1/$p
+    patch -p1 < $TMP/$1/$p
+   done
+
+  cd $TMP
+}
+
 make_kernel() {
   DIR=linux-$KVER
   INSTALL_DIR=$1
