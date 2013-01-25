@@ -121,8 +121,8 @@ patch_source()
     touch .patched
     for p in $PATCHES
      do
-      ls $TMP/$1/$p
-      patch -p1 < $TMP/$1/$p
+      ls $1/$p
+      patch -p1 < $1/$p
      done
     cd $TMP
    fi

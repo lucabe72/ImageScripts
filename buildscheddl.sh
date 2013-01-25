@@ -1,10 +1,11 @@
 set -e
 
+SDIR=$(cd -- $(dirname $0) && pwd)
 TARGET_PATH=/home/vrouter
 OUT_DIR=$PWD/Out/Host
 TMP_DIR=/tmp/BuildHost
 KVER=3.7.1
-PATCHES=Patches/DLPatches
+PATCHES=$SDIR/Patches/DLPatches
 
 . $(dirname $0)/utils.sh
 CPUS=$(get_j)
