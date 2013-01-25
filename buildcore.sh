@@ -44,10 +44,10 @@ make DESTDIR=/tmp/S install
 cp /tmp/S/bin/sudo ../busybox-1.20.2/_install/bin
 get_exec_libs ../busybox-1.20.2/_install/bin/sudo ../busybox-1.20.2/_install
 
-fetch_lib /lib libnss_compat* ../busybox-1.20.2/_install
-fetch_lib /lib libnss_files* ../busybox-1.20.2/_install
-fetch_lib /lib64 libnss_compat* ../busybox-1.20.2/_install
-fetch_lib /lib64 libnss_files* ../busybox-1.20.2/_install
+fetch_lib /lib/   libnss_compat* ../busybox-1.20.2/_install
+fetch_lib /lib/   libnss_files*  ../busybox-1.20.2/_install
+fetch_lib /lib64/ libnss_compat* ../busybox-1.20.2/_install
+fetch_lib /lib64/ libnss_files*  ../busybox-1.20.2/_install
 
 cd ..
 
