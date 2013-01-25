@@ -91,9 +91,10 @@ get_kernel() {
 }
 
 build_kernel() {
-  CFGNAME=$(basename $2)
-  mkdir -p build-$CFGNAME
-  cd       build-$CFGNAME
+  BUILDDIR=$4
+
+  mkdir -p $BUILDDIR
+  cd       $BUILDDIR
   cp $2 .config
   make -C $(pwd)/../$1 O=$(pwd) oldconfig
   make -j $3
@@ -101,10 +102,11 @@ build_kernel() {
 }
 
 install_kernel() {
-  CFGNAME=$(basename $1)
-  cd build-$CFGNAME
-  make INSTALL_MOD_PATH=$2 modules_install
-  cp arch/x86/boot/bzImage $2
+  BUILDDIR=$3
+
+  cd $BUILDDIR
+  make INSTALL_MOD_PATH=$1 modules_install
+  cp arch/x86/boot/bzImage $1
   cd ..
 }
 
@@ -132,14 +134,15 @@ make_kernel() {
   DIR=linux-$KVER
   INSTALL_DIR=$1
   CONFIG_FILE=$2
-  PATCH_DIR=$3
+  BUILDDIR=$3
+  PATCH_DIR=$4
 
   get_kernel     $DIR
   if [ x$PATCH_DIR != x ];
    then
     patch_source $PATCH_DIR linux-$KVER
    fi
-  build_kernel   $DIR $CONFIG_FILE $CPUS
-  install_kernel $CONFIG_FILE $INSTALL_DIR
+  build_kernel   $DIR $CONFIG_FILE $CPUS $BUILDDIR
+  install_kernel $INSTALL_DIR $CONFIG_FILE $BUILDDIR
 }
 

@@ -157,7 +157,7 @@ echo Get libs 64
 }
 
 make_click_kernel() {
-  make_kernel $TMP_DIR $2
+  make_kernel $TMP_DIR $2 linux-$KVER
   get_click
   patch_click $SDIR/Patches/click
   build_click $TARGET_PATH $CPUS

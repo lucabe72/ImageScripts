@@ -15,7 +15,7 @@ if test -e $TMP_DIR/bzImage;
  then
   echo $TMP_DIR/bzImage already exists
  else
-  make_kernel $TMP_DIR $2 $PATCHES
+  make_kernel $TMP_DIR $2 build-host$KVER $PATCHES
  fi
 mkdir -p $OUT_DIR
 mv $TMP_DIR/bzImage $OUT_DIR
