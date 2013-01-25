@@ -8,8 +8,9 @@ USER="tc"
 INSTALLED=""
 
 addUser(){
-	echo "${GREEN}Adding user ${YELLOW} $USER ${NORMAL}"
-	/bin/adduser -s /bin/sh -G staff -D "$USER"
+	ID=$(echo $(ls -ld /etc) | cut -d ' ' -f 3)
+	echo "${GREEN}Adding user ${YELLOW} $USER ($ID) ${NORMAL}"
+	/bin/adduser -s /bin/sh -G staff -u $ID -D "$USER"
 	echo "$USER":tcuser | /sbin/chpasswd -m
 	echo -e "$USER\tALL=NOPASSWD: ALL" >> /etc/sudoers
 	setupHome
@@ -213,10 +214,13 @@ fi
 [ -n "$TEXT" ] && touch /etc/sysconfig/text
 
 if [ -n "$USER" ]; then
-	if ! grep "$USER" /etc/passwd >/dev/null; then addUser; fi
+#	if ! grep "$USER" /etc/passwd >/dev/null; then addUser; fi
+	echo User: $USER
 else
 	USER="tc"
 fi
+addUser
+
 echo "$USER" > /etc/sysconfig/tcuser
 if [ -n "$SUPERUSER" ]; then
 	touch /etc/sysconfig/superuser
