@@ -102,7 +102,7 @@ build_kernel() {
 }
 
 install_kernel() {
-  BUILDDIR=$3
+  BUILDDIR=$2
 
   cd $BUILDDIR
   make INSTALL_MOD_PATH=$1 modules_install
@@ -143,6 +143,6 @@ make_kernel() {
     patch_source $PATCH_DIR linux-$KVER
    fi
   build_kernel   $DIR $CONFIG_FILE $CPUS $BUILDDIR
-  install_kernel $INSTALL_DIR $CONFIG_FILE $BUILDDIR
+  install_kernel $INSTALL_DIR $BUILDDIR
 }
 
