@@ -35,7 +35,5 @@ kernel		/boot/vmlinuz-$KVER waitusb=5 nodhcp nozswap opt=LABEL=VRouter user=vrou
 initrd		/boot/core-$KVER.gz
 EOF
   sudo cp /tmp/GRUB/menu.lst /mnt/boot/grub/menu.lst
-  sync
-  sudo umount /mnt
-  sudo /sbin/losetup -d /dev/loop0
+  umount_partition /mnt
  fi

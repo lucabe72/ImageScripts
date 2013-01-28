@@ -105,12 +105,9 @@ EOF
     sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
    fi
 
-  sync
-  sudo umount mnt
-  rm -rf mnt
   sudo /sbin/e2label /dev/loop0 VRouter
-  sleep 1 # Why is this needed?
-  sudo /sbin/losetup -d /dev/loop0
+  umount_partition mnt
+  rm -rf mnt
 }
 
 

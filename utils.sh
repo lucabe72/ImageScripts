@@ -11,6 +11,13 @@ mount_partition()
   sudo mount /dev/loop0 $3
 }
 
+umount_partition() {
+  sync
+  sudo umount $1
+  sleep 1 
+  sudo /sbin/losetup -d /dev/loop0
+}
+
 format_partition() {
   echo Formatting partition $2 on $1
   echo Getting partition information...

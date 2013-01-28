@@ -34,10 +34,7 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 EOF
   chmod +x /tmp/bootlocal.sh
   sudo cp /tmp/bootlocal.sh /mnt/opt/bootlocal.sh
-  sync
-  sudo umount /mnt
-  sleep 1
-  sudo /sbin/losetup -d /dev/loop0
+  umount_partition /mnt
  fi
 
 #$4: Host image -> Install guest image and stuff in /home/vrouter
@@ -48,7 +45,5 @@ if [ x$4 != x ];
   sudo cp $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot
   sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz
   sudo cp $GUEST_IMG /mnt/home/vrouter/Net
-  sync
-  sudo umount /mnt
-  sudo /sbin/losetup -d /dev/loop0
+  umount_partition /mnt
  fi

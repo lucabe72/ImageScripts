@@ -44,11 +44,8 @@ echo Mounting the partition...
 mount_partition $INAME img1 /mnt
 sudo touch /mnt/here
 
-sleep 1
 echo Cleaning up...
-sync
-sudo umount /mnt
-sudo /sbin/losetup -d /dev/loop0
+umount_partition /mnt
 
 if [ $PSIZE -ne $ISIZE ];
  then

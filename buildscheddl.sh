@@ -29,8 +29,6 @@ if [ x$3 != x ];
   mount_partition $3 img1 /mnt
   sudo cp $OUT_DIR/core.gz /mnt/boot/core-$KVER.gz
   sudo cp $OUT_DIR/bzImage /mnt/boot/vmlinuz-$KVER
-  sync
-  sudo umount /mnt
-  sudo /sbin/losetup -d /dev/loop0
+  umount_partition /mnt
  fi
 

@@ -41,9 +41,7 @@ default		0
 timeout		5
 EOF
   sudo cp /tmp/GRUB/menu.lst /mnt/boot/grub/menu.lst
-  sync
-  sudo umount /mnt
-  sudo /sbin/losetup -d /dev/loop0
+  umount_partition /mnt
   $2/sbin/grub --device-map=/dev/null << EOF
 device (hd0) $1
 root (hd0,0)
