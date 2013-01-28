@@ -39,10 +39,6 @@ copy_grub() {
   cat > /tmp/GRUB/menu.lst << EOF
 default		0
 timeout		5
-title		VRouter
-root		(hd0,0)
-kernel		/boot/vmlinuz-$KVER waitusb=5 nodhcp nozswap opt=LABEL=VRouter user=vrouter home=LABEL=VRouter
-initrd		/boot/core-$KVER.gz
 EOF
   sudo cp /tmp/GRUB/menu.lst /mnt/boot/grub/menu.lst
   sync

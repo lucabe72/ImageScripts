@@ -27,6 +27,14 @@ if [ x$3 != x ];
   mount_partition $3 img1 /mnt
   sudo cp $OUT_DIR/core.gz /mnt/boot/core-$KVER.gz
   sudo cp $OUT_DIR/bzImage /mnt/boot/vmlinuz-$KVER
+  cp /mnt/boot/grub/menu.lst /tmp/GRUB/menu.lst
+  cat >> /tmp/GRUB/menu.lst << EOF
+title		VRouter
+root		(hd0,0)
+kernel		/boot/vmlinuz-$KVER waitusb=5 nodhcp nozswap opt=LABEL=VRouter user=vrouter home=LABEL=VRouter
+initrd		/boot/core-$KVER.gz
+EOF
+  sudo cp /tmp/GRUB/menu.lst /mnt/boot/grub/menu.lst
   sync
   sudo umount /mnt
   sudo /sbin/losetup -d /dev/loop0
