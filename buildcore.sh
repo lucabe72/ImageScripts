@@ -23,10 +23,12 @@ cp $CFG .config
 make oldconfig
 make
 make install
+rm -rf _install/etc
 cp -a $SRCD/etc _install/etc
 cp $SRCD/usr_sbin/* _install/usr/sbin
 cp $SRCD/sbin/* _install/sbin
 rm _install/linuxrc
+rm _install/init
 ln -s /bin/busybox _install/init
 
 #FIXME!
