@@ -85,70 +85,6 @@ find_mountpoint() {
  MOUNTPOINT="$(grep -i ^$D2\  /etc/fstab|awk '{print $2}'|head -n 1)"
 }
 
-autoscan(){
-FOUND=""
-for DEVICE in `autoscan-devices`; do
-   find_mountpoint $DEVICE
-   if [ -n "$MOUNTPOINT" ]; then
-     if [ "$MOUNTED" == "no" ]; then
-       mount "$MOUNTPOINT" >/dev/null 2>&1
-     fi
-     if [ "-$2" "$MOUNTPOINT"/$1 ]; then
-       FOUND="yes"
-     fi
-     if [ "$MOUNTED" == "no" ]; then
-       umount "$MOUNTPOINT" >/dev/null 2>&1
-     fi
-     if [ -n "$FOUND" ]; then 
-       echo "$DEVICE"
-       return 0
-     fi
-   fi
-done
-DEVICE=""
-return 1
-}
-
-getpasswd(){
-  readpassword(){
-    PASSWD=""
-    until [ ${#PASSWD} -ge 8 ] && [ ${#PASSWD} -le 56 ]; do
-      PASSWD=""
-      CH="."
-      if [ "$2" == "confirm" ]; then
-        echo -n "${BLUE} Re-enter${NORMAL}: "
-      else
-        echo -n "${BLUE}Enter password (8 to 56 characters) for ${YELLOW}$1${NORMAL}: "
-      fi
-      while [ "$CH" != "" ]; do
-        read -s -n 1 CH
-        if [ "$CH" == "" -a ${#PASSWD} -gt 0 ]; then
-          PASSWD=`echo $PASSWD | busybox sed 's/.$//'`
-          echo -n -e "\b \b"
-        elif [ "$CH" != "" ]; then
-          PASSWD="$PASSWD$CH"
-          if [ "$CH" != "" ]; then echo -n "*"; fi
-        fi
-      done
-      [ ${#PASSWD} -lt 8 ] && echo " Password is too short!"
-      [ ${#PASSWD} -gt 56 ] && echo " Password is too long!"
-    done
-  }
-  OK=0
-  until [ "$OK" == 1 ]; do
-    readpassword $1
-    PASSWD1=$PASSWD
-    readpassword $1 confirm
-    if [ "$PASSWD1" == "$PASSWD" ]; then
-      OK=1
-      echo " ${GREEN}Accepted.${NORMAL}"
-    else
-      echo " ${RED}Mismatch.${NORMAL}"
-    fi
-  done
-  return 0
-}
-
 status() {
   local CHECK=$?
   echo -en "\\033[70G[ "
@@ -196,34 +132,6 @@ setupHome(){
    yes n | cp -ai /etc/skel/. /home/"$USER"/ 2>/dev/null
    chown -Rh "$USER".staff /home/"$USER"
    chmod g+s /home/"$USER"
-}
-
-merge() {
-awk -v mergedata="$1" -v target="$3" '
-{
-  if ( index($0,target) ) 
-  {
-     while (( getline item < mergedata ) > 0 )
-       print item
-     close(mergedata)
-  }
-  print $0
-} ' "$2"
-}
-
-purge(){
-awk -v startTarget="$2" -v endTarget="$3" '
-BEGIN { writeFlag=1 }
-{
-  if (index($0, startTarget))
-  {
-    print $0 
-    writeFlag=0
-  } else
-    if (index($0, endTarget)) writeFlag=1
-  
-  if (writeFlag) print $0
-} ' "$1"
 }
 
 getMajorVer() {

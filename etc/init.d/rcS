@@ -50,6 +50,7 @@ KERNEL="$(uname -r)"
 echo "${GREEN}Running Linux Kernel ${YELLOW}$KERNEL${GREEN}.${NORMAL}"
 export PATH=/usr/local/sbin:/usr/local/bin:"$PATH"
 
+HOST=sfingivr
 # Here we check all the boot parameters using the fastest way known to men, case & loop
 echo -n "${BLUE}Checking boot options...${NORMAL}"
 for i in `cat /proc/cmdline`; do
@@ -60,46 +61,23 @@ for i in `cat /proc/cmdline`; do
 				lang*) LANGUAGE=${i#*=} ;;
 				kmap*) KEYMAP=${i#*=} ;;
 				tz*) TZ=${i#*=} ;;
-				desktop*) DESKTOP=${i#*=} ;;
-				icons*) ICONS=${i#*=} ;;
 				user*) USER=${i#*=} ;;
 				home*) MYHOME=${i#*=} ;;
-				tcvd*) TCVD=${i#*=} ;;
 				opt*) MYOPT=${i#*=} ;;
 				swapfile*) SWAPFILE=${i#*=} ;;
-				resume*) RESUME=${i#*=} ;;
-				host*) HOST=1 ;;
-				nfsmount* ) NFSMOUNT=${i#*=} ;;
-				tftplist* ) TFTPLIST=${i#*=} ;;
-				httplist* ) HTTPLIST=${i#*=} ;;
-				aoe* ) AOE=${i#*=} ;;
-				nbd* ) NBD=${i#*=} ;;
-				mydata* ) MYDATA=${i#*=} ;;
-				xvesa* ) XVESA=${i#*=} ;;
+				host*) HOST=${i#*=} ;;
 				rsyslog=* ) RSYSLOG=${i#*=}; SYSLOG=1 ;;
 				blacklist* ) BLACKLIST="$BLACKLIST ${i#*=}" ;;
-				iso* ) ISOFILE=${i#*=} ;;
 			esac
 		;;
 		*)
 			case $i in
-				nozswap) NOZSWAP=1 ;;
 				nofstab) NOFSTAB=1 ;;
 				syslog) SYSLOG=1 ;;
 				noutc) NOUTC=1 ;;
-				nodhcp) NODHCP=1 ;;
-				noicons) NOICONS=1 ;;
-				text) TEXT=1 ;;
 				superuser) SUPERUSER=1 ;;
 				noswap) NOSWAP=1 ;;
-				secure) SECURE=1 ;;
-				protect) PROTECT=1 ;;
 				cron) CRON=1 ;;
-				xsetup) XSETUP=1 ;;
-				laptop) LAPTOP=1 ;;
-				base) ONLYBASE=1 ;;
-				showapps) SHOWAPPS=1 ;;
-				norestore) NORESTORE=1 ;;
 				noautologin) NOAUTOLOGIN=1 ;;
 				pause) PAUSE=1 ;;
 			esac
@@ -189,11 +167,13 @@ else
 	 hwclock -u -s &
 fi
 
-if [ -n "$HOST" ]; then
-	sethostname
-else
-	/bin/hostname -F /etc/hostname
-fi
+echo $HOST > /etc/hostname
+/bin/hostname -F /etc/hostname
+rm -f /etc/hosts
+cat >/etc/hosts <<EOT
+127.0.0.1 $HOSTNAME localhost
+EOT
+
 
 /sbin/ifconfig lo 127.0.0.1 up
 /sbin/route add 127.0.0.1 lo &
@@ -209,8 +189,6 @@ if grep -q "^/dev/root" /proc/mounts; then
 fi
 
 /sbin/ldconfig 2>/dev/null
-
-[ -n "$TEXT" ] && touch /etc/sysconfig/text
 
 if [ -n "$USER" ]; then
 #	if ! grep "$USER" /etc/passwd >/dev/null; then addUser; fi
@@ -311,18 +289,6 @@ if [ -n "$SWAPFILE" ]; then
 	fi
 fi
 
-if [ -n "$RESUME" ]; then
-	rm -f /etc/sysconfig/tc.resume 2>/dev/null
-	RESUME=`basename $RESUME`
-	SWAP_SIZE=$(cat /proc/swaps | grep "$RESUME" | awk '{print $3}')
-	[ -z "$SWAP_SIZE" ] && /sbin/swapon /dev/"$RESUME" &&  SWAP_SIZE=$(cat /proc/swaps | grep "$RESUME" | awk '{print $3}')
-	[ -z "$SWAP_SIZE" ] && exit 1
-	MEM_SIZE=$(cat /proc/meminfo | awk '/MemTotal/{print $2}')
-	if [ $SWAP_SIZE -gt $MEM_SIZE ]; then
-		grep -q disk /sys/power/state &&  echo "disk" > /etc/sysconfig/tc.resume
-	fi
-fi
-
 sync
 
 wait $fstab_pid
@@ -333,19 +299,6 @@ if [ -f "/usr/share/kmap/$KEYMAP.kmap" ]; then
 	/sbin/loadkmap < /usr/share/kmap/$KEYMAP.kmap
 	echo "KEYMAP=$KEYMAP" > /etc/sysconfig/keymap
 	echo "${GREEN} Done.${NORMAL}"
-fi
-
-if [ -n "$SECURE" ]; then
-	getpasswd "root"
-	echo "root:$PASSWD" | chpasswd -m
-	getpasswd "$USER"
-	echo "$USER:$PASSWD" | chpasswd -m
-fi
-if [ -n "$PROTECT" ]; then
-	getpasswd "encryption"
-	echo "$PASSWD" > /etc/sysconfig/bfe
-	chown ${USER}:root /etc/sysconfig/bfe
-	chmod 600 /etc/sysconfig/bfe
 fi
 
 [ -n "$CRON" ] && /etc/init.d/services/crond start
