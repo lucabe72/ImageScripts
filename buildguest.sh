@@ -42,8 +42,8 @@ if [ x$4 != x ];
  then
   mount_partition $4 img5 /mnt
   sudo mkdir -p /mnt/home/vrouter/Net/Core/boot
-  sudo cp $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot
-  sudo cp $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz
-  sudo cp $GUEST_IMG /mnt/home/vrouter/Net
+  sudo cp -a $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot
+  sudo cp -a $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz
+  sudo cp -a $GUEST_IMG /mnt/home/vrouter/Net
   umount_partition /mnt
  fi
