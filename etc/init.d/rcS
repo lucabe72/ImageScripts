@@ -11,7 +11,7 @@ addUser(){
 	ID=$(echo $(ls -ld /etc) | cut -d ' ' -f 3)
 	echo "${GREEN}Adding user ${YELLOW} $USER ($ID) ${NORMAL}"
 	/bin/adduser -s /bin/sh -G staff -u $ID -D "$USER"
-	echo "$USER":tcuser | /sbin/chpasswd -m
+	echo "$USER":sfingi | /sbin/chpasswd -m
 	echo -e "$USER\tALL=NOPASSWD: ALL" >> /etc/sudoers
 	setupHome
 }
