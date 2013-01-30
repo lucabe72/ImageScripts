@@ -66,10 +66,18 @@ extract_initramfs() {
 }
 
 mk_initramfs() {
-  echo MkInitRAMFs $1 $2
+  if [ x$3 != x ];
+   then
+    SUDO=""
+    echo MkInitRAMFs $1 $2 NoSUDO
+   else
+    SUDO=sudo
+    echo MkInitRAMFs $1 $2 SUDO
+   fi
+  
   HERE=$PWD
   cd $1
-  sudo find . | sudo cpio -o -H newc | gzip > $2
+  $SUDO find . | $SUDO cpio -o -H newc | gzip > $2
   cd $HERE
 }
 
