@@ -35,6 +35,10 @@ ln -s /bin/busybox _install/init
 mkdir _install/lib64
 mkdir _install/lib
 get_exec_libs _install/bin/busybox _install
+
+fetch_lib /lib/ libpthread.so.0 _install
+fetch_lib /lib/ librt.so.1 _install
+fetch_lib /lib/ libdl.so.2 _install
 cd ..
 
 tar xvzf sudo-1.7.10p3.tar.gz
