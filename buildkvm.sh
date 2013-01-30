@@ -42,7 +42,7 @@ install_kvm() {
 }
 
 get_libs() {
-  PROVIDED_LIBS="libpthread.so libgcc_s.so libc.so librt.so libstdc++.so libm.so libdl.so"
+  PROVIDED_LIBS="$4"
 
   mkdir -p $2/lib
   for A in $3
@@ -69,6 +69,7 @@ echo Get libs 64
 }
 
 make_kvm() {
+  PROVIDED_LIBS="libpthread.so libgcc_s.so libc.so librt.so libstdc++.so libm.so libdl.so"
   get_kvm
   build_kvm /home/$VRUSER/Public-KVM-Test $CPUS
   install_kvm $1
@@ -77,7 +78,7 @@ make_kvm() {
    then
     get_libs64 $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER qemu-system-x86_64
    else
-    get_libs $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER qemu-system-x86_64
+    get_libs $1/home/$VRUSER/Public-KVM-Test $1/home/$VRUSER qemu-system-x86_64 "$PROVIDED_LIBS"
    fi
 }
 
