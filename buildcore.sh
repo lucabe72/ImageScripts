@@ -55,5 +55,5 @@ cd ..
 
 
 cd busybox-1.20.2/_install
-find . | cpio -o -H newc | gzip > ../../$1
+find . | cpio -o -H newc | gzip > $1
 
