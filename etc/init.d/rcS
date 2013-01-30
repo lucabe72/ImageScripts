@@ -36,6 +36,7 @@ mkdir -p /dev/shm
 mkdir -p /var/run
 mkdir -p /var/log
 mkdir -p /var/tmp
+chmod a+rw /tmp
 echo "Sfingi VR" > /etc/issue
 # Mount /proc.
 [ -f /proc/cmdline ] || /bin/mount /proc
@@ -351,6 +352,9 @@ fi
 
 cp /etc/init.d/root_profile /root/.profile
 chmod +x /root/.profile
+
+chmod a+rw /dev/null
+chmod a+rw /dev/zero
 
 /opt/bootsync.sh
 
