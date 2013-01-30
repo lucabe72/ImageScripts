@@ -357,6 +357,7 @@ chmod a+rw /dev/null
 chmod a+rw /dev/zero
 
 /opt/bootsync.sh
+sleep 5
 
 [ -n "$NOAUTOLOGIN" ] && echo "booting" > /etc/sysconfig/noautologin
 
