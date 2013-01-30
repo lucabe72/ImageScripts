@@ -127,9 +127,7 @@ for A in $ALIASES
   MOD=$(grep -v cpu $A)
   if [ x$MOD != x ]
    then
-    echo Loading $A $MOD >> /tmp/log.txt
-    /sbin/modprobe -- $MOD &> /tmp/a
-    cat /tmp/a >> /tmp/log.txt
+    /sbin/modprobe -- $MOD
    fi
  done
 echo "${GREEN}Done.${NORMAL}"
