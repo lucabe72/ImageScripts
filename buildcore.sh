@@ -1,5 +1,5 @@
 SRCD=$(pwd)
-CFG=$(pwd)/Configs/config-busybox
+CFG=$(pwd)/Configs/config-busybox-2
 
 get_exec_libs() {
   LIBS=$(ldd $1 | cut -f 2 | cut -d ' ' -f 3)
