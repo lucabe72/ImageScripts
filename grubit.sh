@@ -1,6 +1,5 @@
 set -e
 
-KVER=3.4.14
 TMP_DIR=/tmp/GRUB
 
 . $(dirname $0)/utils.sh

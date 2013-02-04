@@ -7,6 +7,7 @@ HOST_CONFIG=config-3.4-host-32
 export HOST_ARCH=x86
 export GUEST_ARCH=x86
 CORE=$SDIR/core.gz
+KVER=3.4.14
 
 while getopts 48c opt
  do
@@ -27,6 +28,7 @@ if test -e $CORE;
   sh buildcore.sh $CORE
  fi
 
+export KVER
 sh $SDIR/create_image.sh test.img 512 32
 sh $SDIR/create_image.sh opt1.img 48
 export ARCH=$GUEST_ARCH

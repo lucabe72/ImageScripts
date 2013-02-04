@@ -111,7 +111,21 @@ EOF
   rm -rf mnt
 }
 
-
+add_to_grub() {
+  mkdir mnt
+  mount_partition $1 img1 mnt
+  cp mnt/boot/grub/menu.lst /tmp/GRUB/menu.lst
+  cat >> /tmp/GRUB/menu.lst << EOF
+title		VRouter
+root		(hd0,0)
+kernel		/boot/vmlinuz-$KVER waitusb=5 nodhcp nozswap opt=LABEL=VRouter user=vrouter home=LABEL=VRouter
+initrd		/boot/core-$KVER.gz
+EOF
+  sudo cp /tmp/GRUB/menu.lst mnt/boot/grub/menu.lst
+  umount_partition mnt
+  rm -rf mnt
+}
+ 
 make_kvm $TMP_DIR
 get_scripts
 mkdir -p $TMP_DIR/home/$VRUSER/Net
@@ -122,4 +136,4 @@ cp VRouter-Scripts/* $TMP_DIR/home/$VRUSER/Net
 IMG=$1
 cp -r $(dirname $0)/bin $TMP_DIR/home/$VRUSER
 update_home $IMG 5 $TMP_DIR/home/$VRUSER
-
+add_to_grub $IMG
