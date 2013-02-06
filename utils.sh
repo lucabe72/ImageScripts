@@ -82,6 +82,20 @@ update_initramfs()
   mk_initramfs  $2/tmproot $3/core.gz
 }
 
+get_kernel_path() {
+  MAJ=$(echo $KVER | cut -d '.' -f 1)
+  MIN=$(echo $KVER | cut -d '.' -f 2)
+  RES=v$MAJ.$MIN
+  if [ $MAJ = 3 ]
+   then
+    if [ $MIN != 0 ]
+     then
+      RES=v3.x
+     fi
+   fi
+  echo $RES
+}
+
 get_kernel() {
   if test -e $1;
    then
@@ -91,7 +105,8 @@ get_kernel() {
      then
       echo $1.tar.bz2 already exists
      else
-      wget http://www.kernel.org/pub/linux/kernel/v3.0/$1.tar.bz2
+      KPATH=$(get_kernel_path $KVER)
+      wget http://www.kernel.org/pub/linux/kernel/$KPATH/$1.tar.bz2
      fi
     tar xvjf $1.tar.bz2
    fi
