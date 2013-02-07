@@ -1,5 +1,6 @@
 set -e
 
+PARTITION_NAME=RTester
 VRUSER=rtester
 SCRIPTS_REPO=http://www.disi.unitn.it/~abeni/PublicGits/Sfingi/TestScripts.git
 TMP_DIR=/tmp/Tester
@@ -34,7 +35,13 @@ update_home() {
 
   sudo mkdir -p mnt/opt
 
-  sudo /sbin/e2label /dev/loop0 RTester 
+  LABEL=$(sudo /sbin/e2label /dev/loop0)
+  if [ x$LABEL = x ]
+   then
+    sudo /sbin/e2label /dev/loop0 $PARTITION_NAME
+   else
+    PARTITION_NAME=$LABEL
+   fi
   umount_partition mnt
   rm -rf mnt
 }
@@ -46,7 +53,7 @@ add_to_grub() {
   cat >> /tmp/GRUB/menu.lst << EOF
 title		Router Tester
 root		(hd0,0)
-kernel		/boot/vmlinuz-$KVER$EXTRAKNAME waitusb=5 nodhcp nozswap opt=LABEL=RTester user=rtester home=LABEL=RTester
+kernel		/boot/vmlinuz-$KVER$EXTRAKNAME waitusb=5 nodhcp nozswap opt=LABEL=$PARTITION_NAME user=rtester home=LABEL=$PARTITION_NAME
 initrd		/boot/core-$KVER$EXTRAKNAME.gz
 EOF
   sudo cp /tmp/GRUB/menu.lst mnt/boot/grub/menu.lst

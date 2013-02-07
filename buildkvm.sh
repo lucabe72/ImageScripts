@@ -1,5 +1,6 @@
 set -e
 
+PARTITION_NAME=VRouter
 VRUSER=vrouter
 TMP_DIR=/tmp/KVM
 SCRIPTS_REPO=http://www.disi.unitn.it/~abeni/PublicGits/Sfingi/VRouter-Scripts.git
@@ -106,7 +107,13 @@ EOF
     sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
    fi
 
-  sudo /sbin/e2label /dev/loop0 VRouter
+  LABEL=$(sudo /sbin/e2label /dev/loop0)
+  if [ x$LABEL = x ]
+   then
+    sudo /sbin/e2label /dev/loop0 $PARTITION_NAME
+   else
+    PARTITION_NAME=$LABEL
+   fi
   umount_partition mnt
   rm -rf mnt
 }
@@ -118,7 +125,7 @@ add_to_grub() {
   cat >> /tmp/GRUB/menu.lst << EOF
 title		VRouter
 root		(hd0,0)
-kernel		/boot/vmlinuz-$KVER$EXTRAKNAME waitusb=5 nodhcp nozswap opt=LABEL=VRouter user=vrouter home=LABEL=VRouter
+kernel		/boot/vmlinuz-$KVER$EXTRAKNAME waitusb=5 nodhcp nozswap opt=LABEL=$PARTITION_NAME user=vrouter home=LABEL=$PARTITION_NAME
 initrd		/boot/core-$KVER$EXTRAKNAME.gz
 EOF
   sudo cp /tmp/GRUB/menu.lst mnt/boot/grub/menu.lst
