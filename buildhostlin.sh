@@ -12,7 +12,7 @@ if test -e $TMP_DIR/bzImage;
  then
   echo $TMP_DIR/bzImage already exists
  else
-  make_kernel $TMP_DIR $2 build-host$KVER
+  make_kernel $TMP_DIR $2 build-host$KVER$EXTRAKNAME
  fi
 mkdir -p $OUT_DIR
 mv $TMP_DIR/bzImage $OUT_DIR
@@ -24,7 +24,7 @@ if [ x$3 != x ];
  then
   echo copying to image...
   mount_partition $3 img1 /mnt
-  sudo cp $OUT_DIR/core.gz /mnt/boot/core-$KVER.gz
-  sudo cp $OUT_DIR/bzImage /mnt/boot/vmlinuz-$KVER
+  sudo cp $OUT_DIR/core.gz /mnt/boot/core-$KVER$EXTRAKNAME.gz
+  sudo cp $OUT_DIR/bzImage /mnt/boot/vmlinuz-$KVER$EXTRAKNAME
   umount_partition /mnt
  fi

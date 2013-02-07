@@ -46,8 +46,8 @@ add_to_grub() {
   cat >> /tmp/GRUB/menu.lst << EOF
 title		Router Tester
 root		(hd0,0)
-kernel		/boot/vmlinuz-$KVER waitusb=5 nodhcp nozswap opt=LABEL=RTester user=rtester home=LABEL=RTester
-initrd		/boot/core-$KVER.gz
+kernel		/boot/vmlinuz-$KVER$EXTRAKNAME waitusb=5 nodhcp nozswap opt=LABEL=RTester user=rtester home=LABEL=RTester
+initrd		/boot/core-$KVER$EXTRAKNAME.gz
 EOF
   sudo cp /tmp/GRUB/menu.lst mnt/boot/grub/menu.lst
   umount_partition mnt
