@@ -27,9 +27,9 @@ if [ x$3 != x ];
   mount_partition $GUEST_IMG img1 /mnt
   sudo mkdir -p /mnt/opt
   cat > /tmp/bootlocal.sh << EOF
-ifconfig eth0 192.168.1.3
-ifconfig eth0:1 192.168.2.3
-ifconfig eth0 txqueuelen 20000
+/sbin/ifconfig eth0 192.168.1.3
+/sbin/ifconfig eth0:1 192.168.2.3
+/sbin/ifconfig eth0 txqueuelen 20000
 echo 1 > /proc/sys/net/ipv4/ip_forward
 EOF
   chmod +x /tmp/bootlocal.sh
