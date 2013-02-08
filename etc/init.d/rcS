@@ -356,7 +356,7 @@ chmod +x /root/.profile
 chmod a+rw /dev/null
 chmod a+rw /dev/zero
 
-/opt/bootsync.sh
+/opt/bootlocal.sh
 sleep 5
 
 [ -n "$NOAUTOLOGIN" ] && echo "booting" > /etc/sysconfig/noautologin
