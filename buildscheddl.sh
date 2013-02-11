@@ -22,6 +22,13 @@ mv $TMP_DIR/bzImage $OUT_DIR
 
 update_initramfs $1 $TMP_DIR $OUT_DIR
 
+mkdir -p bin
+mkdir -p build-chdl
+cd       build-chdl
+make -f $SDIR/chdl/Makefile SRCDIR=$SDIR/chdl
+cp chdl ../bin
+cd ..
+
 #$3: Host image -> Install kernel and core in the boot directory 
 if [ x$3 != x ];
  then
