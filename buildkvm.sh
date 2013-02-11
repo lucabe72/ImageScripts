@@ -1,5 +1,6 @@
 set -e
 
+PARTITION_NAME=VRouter
 VRUSER=vrouter
 TMP_DIR=/tmp/KVM
 SCRIPTS_REPO=http://www.disi.unitn.it/~abeni/PublicGits/Sfingi/VRouter-Scripts.git
@@ -106,12 +107,32 @@ EOF
     sudo cp /tmp/bootlocal.sh mnt/opt/bootlocal.sh
    fi
 
-  sudo /sbin/e2label /dev/loop0 VRouter
+  LABEL=$(sudo /sbin/e2label /dev/loop0)
+  if [ x$LABEL = x ]
+   then
+    sudo /sbin/e2label /dev/loop0 $PARTITION_NAME
+   else
+    PARTITION_NAME=$LABEL
+   fi
   umount_partition mnt
   rm -rf mnt
 }
 
-
+add_to_grub() {
+  mkdir mnt
+  mount_partition $1 img1 mnt
+  cp mnt/boot/grub/menu.lst /tmp/GRUB/menu.lst
+  cat >> /tmp/GRUB/menu.lst << EOF
+title		VRouter
+root		(hd0,0)
+kernel		/boot/vmlinuz-$KVER$EXTRAKNAME waitusb=5 nodhcp nozswap opt=LABEL=$PARTITION_NAME user=vrouter home=LABEL=$PARTITION_NAME
+initrd		/boot/core-$KVER$EXTRAKNAME.gz
+EOF
+  sudo cp /tmp/GRUB/menu.lst mnt/boot/grub/menu.lst
+  umount_partition mnt
+  rm -rf mnt
+}
+ 
 make_kvm $TMP_DIR
 get_scripts
 mkdir -p $TMP_DIR/home/$VRUSER/Net
@@ -122,4 +143,4 @@ cp VRouter-Scripts/* $TMP_DIR/home/$VRUSER/Net
 IMG=$1
 cp -r $(dirname $0)/bin $TMP_DIR/home/$VRUSER
 update_home $IMG 5 $TMP_DIR/home/$VRUSER
-
+add_to_grub $IMG
