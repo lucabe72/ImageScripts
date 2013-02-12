@@ -135,12 +135,17 @@ EOF
  
 make_kvm $TMP_DIR
 get_scripts
-mkdir -p $TMP_DIR/home/$VRUSER/Net
-cp VRouter-Scripts/* $TMP_DIR/home/$VRUSER/Net
+mkdir -p               $TMP_DIR/home/$VRUSER/Net
+mkdir -p               $TMP_DIR/home/$VRUSER/bin
+cp VRouter-Scripts/*   $TMP_DIR/home/$VRUSER/Net
 #mkdir -p $OUT_DIR
 #cp $1 $OUT_DIR/opt1.img
 #IMG=$OUT_DIR/opt1.img
 IMG=$1
-cp -r $(dirname $0)/bin $TMP_DIR/home/$VRUSER
-update_home $IMG 5 $TMP_DIR/home/$VRUSER
+cp $(dirname $0)/bin/* $TMP_DIR/home/$VRUSER/bin
+if test -e bin;
+ then
+  cp bin/*             $TMP_DIR/home/$VRUSER/bin
+ fi
+update_home $IMG 5     $TMP_DIR/home/$VRUSER
 add_to_grub $IMG
