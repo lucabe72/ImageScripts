@@ -1,0 +1,65 @@
+#!/bin/sh
+
+addcpu() {
+  if [ x$1 = x ] 
+   then
+    echo $2
+   else
+    echo $1,$2
+   fi
+}
+
+mask2list() {
+CPU=$(seq 0 15)
+  for c in $CPU
+   do
+    tmp=$(($1 & 1 << c))  
+    if [ $tmp -ne 0 ]
+     then
+      SET=$(addcpu "$SET" $c)
+     fi
+   done
+  echo $SET
+}
+
+cpuset_check() {
+  if test ! -e /dev/cpuset
+   then
+    mkdir /dev/cpuset
+   fi
+  if test ! -e /dev/cpuset/cpus
+   then
+   /bin/mount -t cpuset cpuset /dev/cpuset
+    echo 0 > /dev/cpuset/sched_load_balance
+   fi
+}
+
+check_cpu() {
+  if test ! -e /dev/cpuset/CPU$1
+   then
+    mkdir /dev/cpuset/CPU$1
+    echo $1 > /dev/cpuset/CPU$1/cpus
+    echo 1 > /dev/cpuset/CPU$1/cpu_exclusive
+    echo 0 > /dev/cpuset/CPU$1/mems
+   fi
+}
+
+set_affinity() {
+  echo $1 > /dev/cpuset/CPU$2/tasks
+}
+
+P=$1
+CPUS=$(mask2list $2)
+PID=$3
+if [ $P != "-p" ]
+ then
+  echo "Usage: $0 -p <affinity> <PID>"
+
+echo $P
+echo $CPUS
+echo $PID
+  exit
+ fi
+cpuset_check
+check_cpu $CPUS
+set_affinity $PID $CPUS
