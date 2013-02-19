@@ -25,7 +25,7 @@ get_kvm() {
    then
     echo KVM already exists
    else
-    tar xvzf $(dirname $0)/qemu-kvm.tgz
+    tar xvzf $(dirname $0)/qemu-kvm-git.tgz
    fi
 }
 
