@@ -42,4 +42,4 @@ export ARCH=$GUEST_ARCH
 sh $SDIR/buildguest.sh $CORE $SDIR/Configs/$GUEST_CONFIG opt1.img test.img
 export ARCH=$HOST_ARCH
 sh $SDIR/buildhostlin.sh $CORE $SDIR/Configs/$HOST_CONFIG test.img
-sh $SDIR/buildkvm.sh test.img
+sh $SDIR/buildkvm.sh test.img qemu-kvm-git

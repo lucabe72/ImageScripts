@@ -133,7 +133,7 @@ EOF
   rm -rf mnt
 }
  
-make_kvm $TMP_DIR qemu-kvm-git
+make_kvm $TMP_DIR $2 
 get_scripts
 mkdir -p               $TMP_DIR/home/$VRUSER/Net
 mkdir -p               $TMP_DIR/home/$VRUSER/bin
