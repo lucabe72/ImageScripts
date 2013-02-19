@@ -21,23 +21,23 @@ get_scripts() {
 }
 
 get_kvm() {
-  if test -e qemu-kvm-git;
+  if test -e $1;
    then
     echo KVM already exists
    else
-    tar xvzf $(dirname $0)/qemu-kvm-git.tgz
+    tar xvzf $(dirname $0)/$1.tgz
    fi
 }
 
 build_kvm() {
-  cd qemu-kvm-git
+  cd $3
   ./configure --prefix=$1
   make -j $2
   cd ..
 }
 
 install_kvm() {
-  cd qemu-kvm-git
+  cd $2
   make DESTDIR=$1 install
   cd ..
 }
@@ -71,9 +71,9 @@ echo Get libs 64
 
 make_kvm() {
   PROVIDED_LIBS="libpthread.so libgcc_s.so libc.so librt.so libstdc++.so libm.so libdl.so"
-  get_kvm
-  build_kvm /home/$VRUSER/Public-KVM-Test $CPUS
-  install_kvm $1
+  get_kvm $2
+  build_kvm /home/$VRUSER/Public-KVM-Test $CPUS $2
+  install_kvm $1 $2
   MY_ARCH=$(arch)
   if [ $MY_ARCH = x86_64 ];
    then
@@ -133,7 +133,7 @@ EOF
   rm -rf mnt
 }
  
-make_kvm $TMP_DIR
+make_kvm $TMP_DIR qemu-kvm-git
 get_scripts
 mkdir -p               $TMP_DIR/home/$VRUSER/Net
 mkdir -p               $TMP_DIR/home/$VRUSER/bin
