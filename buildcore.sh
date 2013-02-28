@@ -1,5 +1,10 @@
-SRCD=$(pwd)
-CFG=$(pwd)/Configs/config-busybox-2
+set -e
+
+SDIR=$(cd -- $(dirname $0) && pwd)
+CFG=$SDIR/Configs/config-busybox-2
+
+. $(dirname $0)/utils.sh
+CPUS=$(get_j)
 
 get_exec_libs() {
   LIBS=$(ldd $1 | cut -f 2 | cut -d ' ' -f 3)
@@ -17,18 +22,17 @@ fetch_lib() {
   cp $LIB $3/$1
 }
 
-tar xvjf busybox-1.20.2.tar.bz2
+tar xvjf $SDIR/busybox-1.20.2.tar.bz2
 cd busybox-1.20.2
 cp $CFG .config
 make oldconfig
-make
+make -j $CPUS
+rm -rf _install
 make install
-rm -rf _install/etc
-cp -a $SRCD/etc _install/etc
-cp $SRCD/usr_sbin/* _install/usr/sbin
-cp $SRCD/sbin/* _install/sbin
-rm _install/linuxrc
-rm _install/init
+cp -a $SDIR/etc _install/etc
+cp $SDIR/sbin/* _install/sbin
+rm -f _install/linuxrc
+rm -f _install/init
 ln -s /bin/busybox _install/init
 
 #FIXME!
@@ -41,10 +45,10 @@ fetch_lib /lib/ librt.so.1 _install
 fetch_lib /lib/ libdl.so.2 _install
 cd ..
 
-tar xvzf sudo-1.7.10p3.tar.gz
+tar xvzf $SDIR/sudo-1.7.10p3.tar.gz
 cd sudo-1.7.10p3
 ./configure --prefix=/ --disable-authentication --disable-shadow --disable-pam-session --disable-zlib --without-lecture --without-sendmail --without-umask --without-interfaces --without-pam
-make -j 6
+make -j $CPUS 
 rm -rf /tmp/S
 make DESTDIR=/tmp/S install
 cp /tmp/S/bin/sudo ../busybox-1.20.2/_install/bin
