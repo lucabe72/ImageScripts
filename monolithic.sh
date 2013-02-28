@@ -9,15 +9,17 @@ export GUEST_ARCH=x86
 CORE=$SDIR/core.gz
 KVER=3.4.14
 EXTRAKNAME="-vrhost"
+KVM_NAME=qemu-kvm-git
 
-while getopts 48ckn opt
+while getopts 48cknq: opt
  do
   case "$opt" in
     4)		HOST_ARCH=x86_64; HOST_CONFIG=config-3.4-host-64;;
     8)		GUEST_ARCH=x86_64; GUEST_CONFIG=config-3.4-guest-64;;
     c)		CORE=$(pwd)/test.gz;;
     k)		KEEPIMAGE=YesPlease;;
-    n)		KVM_PATCHES=Patches/Netmap/kvm-git
+    n)		KVM_PATCHES=Patches/Netmap/kvm-git;;
+    q)		KVM_NAME=$OPTARG;;
     [?])	print >&2 "Usage: $0 [-4]"
 		exit 1;;
   esac
@@ -28,7 +30,7 @@ if test -e $CORE;
   echo $CORE already exists
  else
   echo Building $CORE
-  sh buildcore.sh $CORE
+  sh $SDIR/buildcore.sh $CORE
  fi
 
 export KVER
@@ -43,4 +45,4 @@ export ARCH=$GUEST_ARCH
 sh $SDIR/buildguest.sh $CORE $SDIR/Configs/$GUEST_CONFIG opt1.img test.img
 export ARCH=$HOST_ARCH
 sh $SDIR/buildhostlin.sh $CORE $SDIR/Configs/$HOST_CONFIG test.img
-sh $SDIR/buildkvm.sh test.img qemu-kvm-git $KVM_PATCHES 
+sh $SDIR/buildkvm.sh test.img $KVM_NAME $KVM_PATCHES 
