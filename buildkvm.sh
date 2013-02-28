@@ -27,6 +27,11 @@ get_kvm() {
    else
     tar xvzf $(dirname $0)/$1.tgz
    fi
+  if [ x$2 != x ]
+   then
+    patch_source $(dirname $0)/$2 $1
+    cp $(dirname $0)/Patches/Netmap/*.h $1	#FIXME?
+   fi
 }
 
 build_kvm() {
@@ -71,7 +76,7 @@ echo Get libs 64
 
 make_kvm() {
   PROVIDED_LIBS="libpthread.so libgcc_s.so libc.so librt.so libstdc++.so libm.so libdl.so"
-  get_kvm $2
+  get_kvm $2 $3
   build_kvm /home/$VRUSER/Public-KVM-Test $CPUS $2
   install_kvm $1 $2
   MY_ARCH=$(arch)
@@ -133,7 +138,7 @@ EOF
   rm -rf mnt
 }
  
-make_kvm $TMP_DIR $2 
+make_kvm $TMP_DIR $2 $3
 get_scripts
 mkdir -p               $TMP_DIR/home/$VRUSER/Net
 mkdir -p               $TMP_DIR/home/$VRUSER/bin
