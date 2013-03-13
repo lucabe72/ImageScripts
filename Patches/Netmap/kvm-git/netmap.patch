@@ -384,7 +384,7 @@ diff -urpN qemu-kvm-git/net/qemu-netmap.c qemu-kvm-git-netmap/net/qemu-netmap.c
 +		__FUNCTION__, s->me.ifname, ring->cur, ring->avail);
 +    ring->cur = NETMAP_RING_NEXT(ring, i);
 +    ring->avail--;
-+    //netmap_read_poll(s, 1); // XXX only if avail == 0 ?
++    netmap_read_poll(s, 1); // XXX only if avail == 0 ?
 +}
 +
 +/*
