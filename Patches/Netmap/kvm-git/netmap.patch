@@ -409,7 +409,7 @@ diff -urpN qemu-kvm-git/net/qemu-netmap.c qemu-kvm-git-netmap/net/qemu-netmap.c
 +	/* XXX is this a busy wait loop ? */
 +        size = qemu_send_packet_async(&s->nc, src, size, netmap_send_completed);
 +	if (size == 0) {
-+	    if (1 || nm_verbose)
++	    if (nm_verbose)
 +		fprintf(stderr, "RX %d -> to host blocking\n", ring->cur);
 +	    netmap_read_poll(s, 0);
 +	    return;
