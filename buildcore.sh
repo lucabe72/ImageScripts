@@ -51,6 +51,8 @@ build_root() {
   rm -f _install/init
   ln -s /bin/busybox _install/init
 
+  mkdir -p _install/proc
+
   #FIXME!
   mkdir -p _install/lib64
   mkdir -p _install/lib
