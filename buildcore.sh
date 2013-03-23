@@ -88,12 +88,14 @@ get_bb
 build_bb
 build_root
 
+cd busybox-$BBVER
 fetch_lib /lib/ libpthread.so.0 _install
 fetch_lib /lib/ librt.so.1 _install
 fetch_lib /lib/ libdl.so.2 _install
+cd ..
 
 get_sudo
 build_sudo
 install_sudo
 
-mk_initramfs busybox-$BBVER/_install $(pwd)/$1 NoSUDO
+mk_initramfs busybox-$BBVER/_install $1 NoSUDO
