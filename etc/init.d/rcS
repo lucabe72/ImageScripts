@@ -89,6 +89,31 @@ setup_base_fs() {
   /bin/mount -a
 }
 
+find_mountpoint() {
+ MOUNTPOINT=""
+ MOUNTED="no"
+ D2="$1"
+ if [ "${D2:0:6}" == "LABEL=" ]; then
+   LABEL=$(echo $D2 | cut -d '=' -f 2)
+   D2=$(/sbin/blkid | grep LABEL= | grep $LABEL | cut -d ':' -f 1) 
+   if [ "$?" != 0 ]; then
+     MOUNTPOINT=""
+     return
+   else
+     D2="${D2%%:*}"
+   fi
+ else
+   D2=/dev/$D2
+ fi
+ MOUNTPOINT="$(grep -i ^$D2\  /etc/mtab|awk '{print $2}'|head -n 1)"
+ if [ -n "$MOUNTPOINT" ]; then
+   MOUNTED="yes"
+   return
+ fi
+
+ MOUNTPOINT="$(grep -i ^$D2\  /etc/fstab|awk '{print $2}'|head -n 1)"
+}
+
 ### END functions
 
 # Main
