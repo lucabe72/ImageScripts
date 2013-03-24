@@ -119,13 +119,14 @@ mount_partition() {
   wait $fstab_pid
   PARTITION=${PARTITION_DESC##/dev/}
   find_mountpoint "$PARTITION"
-	if [ -n "$MOUNTPOINT" ]; then
-		[ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
-		mount --bind "$MOUNTPOINT"$2 $2
-		chmod g+s $2 >/dev/null 2>&1
-	else
-		echo "Invalid device $1 specified. Skipping mount $2!"
-	fi
+  if [ -n "$MOUNTPOINT" ];
+   then
+    [ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
+    mount --bind "$MOUNTPOINT"$2 $2
+    chmod g+s $2 >/dev/null 2>&1
+   else
+    echo "Invalid device $1 specified. Skipping mount $2!"
+   fi
 }
 
 ### END functions
