@@ -114,6 +114,20 @@ find_mountpoint() {
  MOUNTPOINT="$(grep -i ^$D2\  /etc/fstab|awk '{print $2}'|head -n 1)"
 }
 
+mount_partition() {
+  PARTITION_DESC=$1
+  wait $fstab_pid
+  PARTITION=${PARTITION_DESC##/dev/}
+  find_mountpoint "$PARTITION"
+	if [ -n "$MOUNTPOINT" ]; then
+		[ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
+		mount --bind "$MOUNTPOINT"$2 $2
+		chmod g+s $2 >/dev/null 2>&1
+	else
+		echo "Invalid device $1 specified. Skipping mount $2!"
+	fi
+}
+
 ### END functions
 
 # Main
@@ -205,32 +219,15 @@ if [ -n "$SUPERUSER" ]; then
 fi
     	   
 if [ -n "$MYHOME" ]; then
-	wait $fstab_pid
-	PARTITION=${MYHOME##/dev/}
-	find_mountpoint "$PARTITION"
-	if [ -n "$MOUNTPOINT" ]; then
-		[ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
-		mount --bind "$MOUNTPOINT/home" /home
-	else
-		echo "Invalid device specified. Ignoring persistent HOME request!"
-	fi
+  mount_partition $MYHOME /home
 fi
 
 if [ -n "$MYOPT" ]; then
-	wait $fstab_pid
-	PARTITION=${MYOPT##/dev/}
-	find_mountpoint "$PARTITION"
-	if [ -n "$MOUNTPOINT" ]; then
-		[ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
-		[ -d "$MOUNTPOINT"/opt ] || mkdir "$MOUNTPOINT"/opt
-		yes n | cp -ai /opt/. "$MOUNTPOINT"/opt/ 2>/dev/null
-		mount --bind "$MOUNTPOINT"/opt/ /opt/
-		chgrp -R staff /opt/ >/dev/null 2>&1
-		chmod -R g+w /opt/ >/dev/null 2>&1
-		chmod g+s /opt/ >/dev/null 2>&1
-	else
-		echo "Invalid device specified. Skipping persistent OPT request!"
-	fi
+  mount_partition $MYOPT /opt/
+  yes n | cp -ai /opt/. "$MOUNTPOINT"/opt/ 2>/dev/null
+  [ -d "$MOUNTPOINT"/opt ] || mkdir "$MOUNTPOINT"/opt
+  chgrp -R staff /opt/ >/dev/null 2>&1
+  chmod -R g+w /opt/ >/dev/null 2>&1
 fi
 
 wait $fstab_pid
