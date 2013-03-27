@@ -1,0 +1,39 @@
+From 96df7578d0d99501a8dff5a68fc53ee1f36e1b74 Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Wed, 23 Jan 2013 16:21:53 -0800
+Subject: [PATCH 49/49] sched-dl: add rcu_read_unlock if a best_cpu is returned inside find_later_rq
+
+---
+ kernel/sched/deadline.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/kernel/sched/deadline.c b/kernel/sched/deadline.c
+index 96e5430..6201631 100644
+--- a/kernel/sched/deadline.c
++++ b/kernel/sched/deadline.c
+@@ -1171,16 +1171,20 @@ static int find_later_rq(struct task_struct *task)
+ 			 * cheaper than migrating.
+ 			 */
+ 			if (this_cpu != -1 &&
+-			    cpumask_test_cpu(this_cpu, sched_domain_span(sd)))
++			    cpumask_test_cpu(this_cpu, sched_domain_span(sd))) {
++				rcu_read_unlock();
+ 				return this_cpu;
++			}
+ 
+ 			/*
+ 			 * Last chance: if best_cpu is valid and is
+ 			 * in the mask, that becomes our choice.
+ 			 */
+ 			if (best_cpu < nr_cpu_ids &&
+-			    cpumask_test_cpu(best_cpu, sched_domain_span(sd)))
++			    cpumask_test_cpu(best_cpu, sched_domain_span(sd))) {
++				rcu_read_unlock();
+ 				return best_cpu;
++			}
+ 		}
+ 	}
+ 	rcu_read_unlock();
+-- 
+1.7.2.5
+
