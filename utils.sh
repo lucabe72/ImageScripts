@@ -12,8 +12,13 @@ mount_partition()
 }
 
 umount_partition() {
-  sync
-  sudo umount $1
+  set +e	# umount can fail due to some daemons doing stupid things with loopback devices
+  until sudo umount $1
+   do
+    echo UMount returned $?
+    sleep 1
+   done 
+  set -e
   sleep 1 
   sudo /sbin/losetup -d /dev/loop0
 }
