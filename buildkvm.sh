@@ -3,7 +3,7 @@ set -e
 PARTITION_NAME=VRouter
 VRUSER=vrouter
 TMP_DIR=/tmp/KVM
-SCRIPTS_REPO=http://www.disi.unitn.it/~abeni/PublicGits/Sfingi/VRouter-Scripts.git
+SCRIPTS_REPO=git://github.com/lucabe72/VRouter-Scripts.git
 
 . $(dirname $0)/utils.sh
 CPUS=$(get_j)
