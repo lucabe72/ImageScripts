@@ -2,18 +2,131 @@
 # RC Script for Tiny Core Linux
 # (c) Robert Shingledecker 2004-2012
 # Several modifications for speed by Curaga
-. /etc/init.d/tc-functions
+#. /etc/init.d/tc-functions
 
-USER="tc"
-INSTALLED=""
+# ANSI COLORS
+CRE="$(echo -e '\r\033[K')"
+RED="$(echo -e '\033[1;31m')"
+GREEN="$(echo -e '\033[1;32m')"
+YELLOW="$(echo -e '\033[1;33m')"
+BLUE="$(echo -e '\033[1;34m')"
+MAGENTA="$(echo -e '\033[1;35m')"
+CYAN="$(echo -e '\033[1;36m')"
+WHITE="$(echo -e '\033[1;37m')"
+NORMAL="$(echo -e '\033[0;39m')"
 
-addUser(){
-	ID=$(echo $(ls -ld /etc) | cut -d ' ' -f 3)
-	echo "${GREEN}Adding user ${YELLOW} $USER ($ID) ${NORMAL}"
-	/bin/adduser -s /bin/sh -G staff -u $ID -D "$USER"
-	echo "$USER":sfingi | /sbin/chpasswd -m
-	echo -e "$USER\tALL=NOPASSWD: ALL" >> /etc/sudoers
-	setupHome
+
+VERSION=0.1
+HOSTNAME=sfingi_vr
+USER="myself"
+PASSWD="sfingi"
+
+setup_home(){
+  yes n | cp -ai /etc/skel/. /home/"$USER"/ 2>/dev/null
+  chown -Rh "$USER".staff /home/"$USER"
+  chmod g+s /home/"$USER"
+}
+
+
+
+add_user(){
+  ID=$(echo $(ls -ld /etc) | cut -d ' ' -f 3)
+  echo -n "${BLUE}Adding user ${YELLOW} $1 ($ID) ${NORMAL}"
+  /bin/adduser -s /bin/sh -G staff -u $ID -D "$USER" > /dev/null
+  echo "$1":$2 | /sbin/chpasswd -m > /dev/null
+  echo -e "$1\tALL=NOPASSWD: ALL" >> /etc/sudoers
+  setup_home
+  echo "${GREEN}Done.${NORMAL}"
+}
+
+start_mdev() {
+  echo -n "${BLUE}Starting mdev daemon for hotplug support...${NORMAL}"
+  echo /sbin/mdev_wrap.sh > /proc/sys/kernel/hotplug
+  mdev -s
+  wait $!
+  echo "${GREEN}Done.${NORMAL}"
+
+  echo -n "${BLUE}Loading kernel modules...${NORMAL}"
+  ALIASES=$(find /sys/devices -name modalias)
+  for A in $ALIASES
+   do
+    MOD=$(grep -v cpu $A)
+    if [ x$MOD != x ]
+     then
+      echo -n "${YELLOW} $MOD ${NORMAL}"
+      /sbin/modprobe -- $MOD 2>/dev/null
+     fi
+   done
+  echo "${GREEN}Done.${NORMAL}"
+}
+
+generate_fstab() {
+  echo "${BLUE}Scanning hard disk partitions to create ${YELLOW}/etc/fstab ${NORMAL}"
+  modprobe scsi_wait_scan 2>/dev/null
+  /sbin/rebuildfstab & fstab_pid=$!
+}
+
+setup_base_fs() {
+  # First, mount /proc (otherwise "mount -o remount..." might generate some (harmless?) errors, trying to access /proc/mounts
+  /bin/mount -t proc proc /proc
+
+  # Then, remount the rootfs read-write
+  /bin/mount -o remount,rw /
+
+  mkdir /sys
+  mkdir /tmp
+  mkdir /home
+  mkdir /opt
+  mkdir -p /dev/pts
+  mkdir -p /dev/shm
+  mkdir -p /var/run
+  mkdir -p /var/log
+  mkdir -p /var/tmp
+  chmod a+rw /tmp
+  echo "Sfingi VR" > /etc/issue
+
+  ln -s         /proc/mounts /etc/mtab
+  /bin/mount -a
+}
+
+find_mountpoint() {
+ MOUNTPOINT=""
+ MOUNTED="no"
+ D2="$1"
+ if [ "${D2:0:6}" == "LABEL=" ]; then
+   LABEL=$(echo $D2 | cut -d '=' -f 2)
+   D2=$(/sbin/blkid | grep LABEL= | grep $LABEL | cut -d ':' -f 1) 
+   if [ "$?" != 0 ]; then
+     MOUNTPOINT=""
+     return
+   else
+     D2="${D2%%:*}"
+   fi
+ else
+   D2=/dev/$D2
+ fi
+ MOUNTPOINT="$(grep -i ^$D2\  /etc/mtab|awk '{print $2}'|head -n 1)"
+ if [ -n "$MOUNTPOINT" ]; then
+   MOUNTED="yes"
+   return
+ fi
+
+ MOUNTPOINT="$(grep -i ^$D2\  /etc/fstab|awk '{print $2}'|head -n 1)"
+}
+
+mount_partition() {
+  PARTITION_DESC=$1
+  wait $fstab_pid
+  PARTITION=${PARTITION_DESC##/dev/}
+  find_mountpoint "$PARTITION"
+  if [ -n "$MOUNTPOINT" ];
+   then
+    [ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
+    mount --bind "$MOUNTPOINT"$2 $2
+    chmod g+s $2 >/dev/null 2>&1
+   else
+    echo "Invalid device $1 specified. Skipping mount $2!"
+   fi
 }
 
 ### END functions
@@ -22,29 +135,7 @@ addUser(){
 clear
 echo "${GREEN}Booting ${YELLOW}Core $VERSION ${NORMAL}"
 
-# Remount rootfs rw.
-/bin/mount -o remount,rw /
-
-mkdir /proc
-mkdir /sys
-mkdir /tmp
-mkdir /home
-mkdir /root
-mkdir /opt
-mkdir -p /dev/pts
-mkdir -p /dev/shm
-mkdir -p /var/run
-mkdir -p /var/log
-mkdir -p /var/tmp
-chmod a+rw /tmp
-echo "Sfingi VR" > /etc/issue
-# Mount /proc.
-[ -f /proc/cmdline ] || /bin/mount /proc
-
-ln -s /proc/mounts /etc/mtab
-
-# Mount system devices from /etc/fstab.
-/bin/mount -a
+setup_base_fs
 
 KERNEL="$(uname -r)"
 echo "${GREEN}Running Linux Kernel ${YELLOW}$KERNEL${GREEN}.${NORMAL}"
@@ -56,51 +147,19 @@ for i in `cat /proc/cmdline`; do
 	case $i in
 		*=*)
 			case $i in
-				waitusb*) WAITUSB=${i#*=} ;;
-				lang*) LANGUAGE=${i#*=} ;;
-				kmap*) KEYMAP=${i#*=} ;;
-				tz*) TZ=${i#*=} ;;
-				desktop*) DESKTOP=${i#*=} ;;
-				icons*) ICONS=${i#*=} ;;
-				user*) USER=${i#*=} ;;
-				home*) MYHOME=${i#*=} ;;
-				tcvd*) TCVD=${i#*=} ;;
-				opt*) MYOPT=${i#*=} ;;
-				swapfile*) SWAPFILE=${i#*=} ;;
-				resume*) RESUME=${i#*=} ;;
-				host*) HOST=1 ;;
-				nfsmount* ) NFSMOUNT=${i#*=} ;;
-				tftplist* ) TFTPLIST=${i#*=} ;;
-				httplist* ) HTTPLIST=${i#*=} ;;
-				aoe* ) AOE=${i#*=} ;;
-				nbd* ) NBD=${i#*=} ;;
-				mydata* ) MYDATA=${i#*=} ;;
-				xvesa* ) XVESA=${i#*=} ;;
-				rsyslog=* ) RSYSLOG=${i#*=}; SYSLOG=1 ;;
+				waitusb*)    WAITUSB=${i#*=} ;;
+				user*)       USER=${i#*=} ;;
+				host*)       HOSTNAME=${i#*=} ;;
+				home*)       MYHOME=${i#*=} ;;
+				opt*)        MYOPT=${i#*=} ;;
+				mydata* )    MYDATA=${i#*=} ;;
 				blacklist* ) BLACKLIST="$BLACKLIST ${i#*=}" ;;
-				iso* ) ISOFILE=${i#*=} ;;
 			esac
 		;;
 		*)
 			case $i in
-				nozswap) NOZSWAP=1 ;;
-				nofstab) NOFSTAB=1 ;;
-				syslog) SYSLOG=1 ;;
-				noutc) NOUTC=1 ;;
-				nodhcp) NODHCP=1 ;;
-				noicons) NOICONS=1 ;;
 				text) TEXT=1 ;;
 				superuser) SUPERUSER=1 ;;
-				noswap) NOSWAP=1 ;;
-				secure) SECURE=1 ;;
-				protect) PROTECT=1 ;;
-				cron) CRON=1 ;;
-				xsetup) XSETUP=1 ;;
-				laptop) LAPTOP=1 ;;
-				base) ONLYBASE=1 ;;
-				showapps) SHOWAPPS=1 ;;
-				norestore) NORESTORE=1 ;;
-				noautologin) NOAUTOLOGIN=1 ;;
 				pause) PAUSE=1 ;;
 			esac
 		;;
@@ -117,70 +176,19 @@ if [ -n "$BLACKLIST" ]; then
 	done
 fi
 
-# Start Udev to populate /dev and handle hotplug events
-echo -n "${BLUE}Starting mdev daemon for hotplug support...${NORMAL}"
-echo /sbin/mdev_wrap.sh > /proc/sys/kernel/hotplug
-mdev -s
-wait $!
-ALIASES=$(find /sys/devices -name modalias)
-for A in $ALIASES
- do
-  MOD=$(grep -v cpu $A)
-  if [ x$MOD != x ]
-   then
-    /sbin/modprobe -- $MOD 2>/dev/null
-   fi
- done
-echo "${GREEN}Done.${NORMAL}"
+start_mdev
 
-[ -n "$WAITUSB" ] && (
-	case $WAITUSB in
-		*:*) dev=${WAITUSB#*:}
-		timeout=$((${WAITUSB%:*} * 4))
-		while [ $timeout -gt 0 ]; do
-			echo -en "${BLUE}\rWaiting as requested ... ${NORMAL}$(($timeout / 4)) "
-			timeout=$(($timeout - 1))
-			sleep 0.25
-			blkid -lt $dev >/dev/null && timeout=0
-		done
-		echo
-		;;
-		*) sleep "$WAITUSB" ;;
-	esac
-)
+[ -n "$WAITUSB" ] && ( sleep "$WAITUSB" )
 
 modprobe loop 2>/dev/null
-#modprobe ohci_hcd
 
-if [ -n "$NOFSTAB" ]; then
-	echo "${BLUE}Skipping /etc/fstab creation as requested from the boot command line.${NORMAL}"
-else
-	echo "${BLUE}Scanning hard disk partitions to create ${YELLOW}/etc/fstab ${NORMAL}"
-	modprobe scsi_wait_scan 2>/dev/null
-	/sbin/rebuildfstab & fstab_pid=$!
-#	mv /tmp/98-tc.rules /etc/udev/rules.d/. 2>/dev/null
-#	/sbin/udevadm control --reload-rules &
-fi
+generate_fstab
 
-if [ -n "$SYSLOG" ]; then
-	 [ -z "$RSYSLOG" ] || SOPTS=" -L -R $RSYSLOG "
-	 /sbin/syslogd ${SOPTS} && echo "${GREEN}syslog started.${NORMAL}"
-	 /sbin/klogd && echo "${GREEN}klog started."
-fi
-
-[ -n "$LANGUAGE" ] || LANGUAGE="C"
-echo -n "${GREEN}Setting Language to ${MAGENTA}$LANGUAGE"
+LANGUAGE="C"
 [ -f /etc/sysconfig ] || mkdir /etc/sysconfig
 echo "LANG=$LANGUAGE" > /etc/sysconfig/language
-echo "${GREEN} Done.${NORMAL}"
 
-if [ -n "$TZ" ]; then
-	echo -n "${GREEN}Setting Timezone to ${MAGENTA}$TZ"
-	export TZ && echo "TZ=$TZ" > /etc/sysconfig/timezone
-	echo "${GREEN} Done.${NORMAL}"
-fi	
-
-echo -n "${GREEN}Waiting for RTC..."
+echo -n "${BLUE}Waiting for RTC..."
 while [ ! -e /dev/rtc0 ]; do usleep 50000; done
 echo "${GREEN} Done.${NORMAL}"
 if [ -n "$NOUTC" ]; then
@@ -189,11 +197,7 @@ else
 	 hwclock -u -s &
 fi
 
-if [ -n "$HOST" ]; then
-	sethostname
-else
-	/bin/hostname -F /etc/hostname
-fi
+/bin/hostname $HOSTNAME
 
 /sbin/ifconfig lo 127.0.0.1 up
 /sbin/route add 127.0.0.1 lo &
@@ -203,155 +207,39 @@ chmod u+s  /bin/busybox /bin/sudo
 
 touch /var/tmp/k5_skip
 
-if grep -q "^/dev/root" /proc/mounts; then
-	INSTALLED=1
-	echo "${RED}Detected Traditional (Scatter) Hard drive installation.${NORMAL}"
-fi
-
 /sbin/ldconfig 2>/dev/null
 
 [ -n "$TEXT" ] && touch /etc/sysconfig/text
 
-if [ -n "$USER" ]; then
-#	if ! grep "$USER" /etc/passwd >/dev/null; then addUser; fi
-	echo User: $USER
-else
-	USER="tc"
-fi
-addUser
+add_user $USER $PASSWD
+mkdir -p /home/"$USER"
+echo "$USER" > /etc/sysconfig/user
 
-echo "$USER" > /etc/sysconfig/tcuser
 if [ -n "$SUPERUSER" ]; then
 	touch /etc/sysconfig/superuser
 fi
-mkdir -p /home/"$USER"
     	   
-# Preload drivers needed for tce/opt/home on lvm/RAID etc
-unset HOME_SETUP
 if [ -n "$MYHOME" ]; then
-	wait $fstab_pid
-	PARTITION=${MYHOME##/dev/}
-	find_mountpoint "$PARTITION"
-	if [ -n "$MOUNTPOINT" ]; then
-		[ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
-
-		MS_MNTS=`mount|awk '$5~/fat|vfat|msdos|ntfs/{printf "%s ",$3}'`
-		case "$MS_MNTS" in 
-			*"$MOUNTPOINT"* )
-				echo "Persistent HOME not supported on Microsoft File Systems."
-				echo "${YELLOW}Request for persistent HOME on $PARTITION ignored."
-				echo -n "${RED}Press Enter key.${NORMAL}"; read ans
-			;;
-			* )
-				if [ -d "$MOUNTPOINT/home/$USER" ]; then
-					mount --bind "$MOUNTPOINT/home" /home
-					HOME_SETUP=1
-				else
-					mkdir -p "$MOUNTPOINT/home/$USER"
-					mount --bind "$MOUNTPOINT/home" /home
-				fi
-			;;
-		esac
-
-	else
-		echo "Invalid device specified. Ignoring persistent HOME request!"
-	fi
+  mount_partition $MYHOME /home
 fi
 
-[ ! "$HOME_SETUP" ] && setupHome
-
-unset OPT_SETUP
 if [ -n "$MYOPT" ]; then
-	wait $fstab_pid
-	PARTITION=${MYOPT##/dev/}
-	find_mountpoint "$PARTITION"
-	if [ -n "$MOUNTPOINT" ]; then
-		[ "$MOUNTED" == "yes" ] || mount "$MOUNTPOINT"
-
-		MS_MNTS=`mount|awk '$5~/fat|vfat|msdos|ntfs/{printf "%s ",$3}'`
-		case "$MS_MNTS" in 
-			*"$MOUNTPOINT"* )
-				echo "Persistent OPT not supported on Microsoft File Systems."
-				echo "${YELLOW}Request for persistent OPT on $PARTITION ignored."
-				echo -n "${RED}Press Enter key.${NORMAL}"; read ans
-			;;
-			* )
-				[ -d "$MOUNTPOINT"/opt ] || mkdir "$MOUNTPOINT"/opt
-				yes n | cp -ai /opt/. "$MOUNTPOINT"/opt/ 2>/dev/null
-				mount --bind "$MOUNTPOINT"/opt/ /opt/
-				chgrp -R staff /opt/ >/dev/null 2>&1
-				chmod -R g+w /opt/ >/dev/null 2>&1
-				chmod g+s /opt/ >/dev/null 2>&1
-			;;
-		esac
-
-	else
-		echo "Invalid device specified. Skipping persistent OPT request!"
-	fi
+  mount_partition $MYOPT /opt/
+  yes n | cp -ai /opt/. "$MOUNTPOINT"/opt/ 2>/dev/null
+  [ -d "$MOUNTPOINT"/opt ] || mkdir "$MOUNTPOINT"/opt
+  chgrp -R staff /opt/ >/dev/null 2>&1
+  chmod -R g+w /opt/ >/dev/null 2>&1
 fi
-
-if [ -n "$NOSWAP" ]; then
-	echo "${BLUE}Ignoring swap partition(s) seek as requested.${NORMAL}"
-else
-	wait $fstab_pid
-	/sbin/swapon -a 2>/dev/null
-	if [ "$?" == 0 ]; then echo "${GREEN}Possible swap partition(s) enabled.${NORMAL}"; fi
-fi
-
-if [ -n "$SWAPFILE" ]; then
-	wait $fstab_pid
-	SWAPFILE=${SWAPFILE##/dev/}
-	find_mountpoint "$SWAPFILE"
-	if [ -n "$MOUNTPOINT" ]; then
-		if [ "$MOUNTED" == "yes" ]; then
-			swapon "$MOUNTPOINT"/tc.swp
-		else
-			mount "$MOUNTPOINT" && swapon "$MOUNTPOINT"/tc.swp
-		fi
-	fi
-fi
-
-if [ -n "$RESUME" ]; then
-	rm -f /etc/sysconfig/tc.resume 2>/dev/null
-	RESUME=`basename $RESUME`
-	SWAP_SIZE=$(cat /proc/swaps | grep "$RESUME" | awk '{print $3}')
-	[ -z "$SWAP_SIZE" ] && /sbin/swapon /dev/"$RESUME" &&  SWAP_SIZE=$(cat /proc/swaps | grep "$RESUME" | awk '{print $3}')
-	[ -z "$SWAP_SIZE" ] && exit 1
-	MEM_SIZE=$(cat /proc/meminfo | awk '/MemTotal/{print $2}')
-	if [ $SWAP_SIZE -gt $MEM_SIZE ]; then
-		grep -q disk /sys/power/state &&  echo "disk" > /etc/sysconfig/tc.resume
-	fi
-fi
-
-sync
 
 wait $fstab_pid
 
-[ -n "$KEYMAP" ] || KEYMAP="us"
+KEYMAP="us"
 if [ -f "/usr/share/kmap/$KEYMAP.kmap" ]; then
 	echo -n "${GREEN}Setting keymap to ${MAGENTA}$KEYMAP"
 	/sbin/loadkmap < /usr/share/kmap/$KEYMAP.kmap
 	echo "KEYMAP=$KEYMAP" > /etc/sysconfig/keymap
 	echo "${GREEN} Done.${NORMAL}"
 fi
-
-if [ -n "$SECURE" ]; then
-	getpasswd "root"
-	echo "root:$PASSWD" | chpasswd -m
-	getpasswd "$USER"
-	echo "$USER:$PASSWD" | chpasswd -m
-fi
-if [ -n "$PROTECT" ]; then
-	getpasswd "encryption"
-	echo "$PASSWD" > /etc/sysconfig/bfe
-	chown ${USER}:root /etc/sysconfig/bfe
-	chmod 600 /etc/sysconfig/bfe
-fi
-
-[ -n "$CRON" ] && /etc/init.d/services/crond start
-
-cp /etc/init.d/root_profile /root/.profile
-chmod +x /root/.profile
 
 chmod a+rw /dev/null
 chmod a+rw /dev/zero

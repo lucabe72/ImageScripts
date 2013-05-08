@@ -27,7 +27,7 @@ if test -e $CORE;
   echo $CORE already exists
  else
   echo Building $CORE
-  sh buildcore.sh $CORE
+  sh $SDIR/buildcore.sh $CORE
  fi
 
 export KVER
