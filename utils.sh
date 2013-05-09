@@ -31,6 +31,7 @@ format_partition() {
   echo Creating a FS on the partition...
   sudo /sbin/losetup --offset $START --sizelimit $SIZE /dev/loop0 $1
   sudo /sbin/mkfs.ext3 /dev/loop0
+  sleep 1
   sudo /sbin/losetup -d /dev/loop0
 }
 
