@@ -91,6 +91,26 @@ update_initramfs()
   mk_initramfs  $2/tmproot $3/core.gz
 }
 
+get_kernel_config_name()
+{
+  MAJ=$(echo $1 | cut -d '.' -f 1)
+  MIN=$(echo $1 | cut -d '.' -f 2)
+  V=$MAJ.$MIN
+
+  if [ $2 = x86 ]
+   then
+    B=32
+   else if [ $2 = x86_64 ]
+     then
+      B=64
+     else
+      B=unknown
+     fi
+   fi
+
+  echo config-$V-$3-$B
+}
+
 get_kernel_path() {
   MAJ=$(echo $KVER | cut -d '.' -f 1)
   MIN=$(echo $KVER | cut -d '.' -f 2)
