@@ -36,7 +36,7 @@ get_kvm() {
 
 build_kvm() {
   cd $3
-  ./configure --prefix=$1
+  LDFLAGS=-lrt ./configure --prefix=$1 --disable-docs
   make -j $2
   cd ..
 }
