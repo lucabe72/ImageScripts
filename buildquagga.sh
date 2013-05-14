@@ -42,7 +42,7 @@ make_quagga() {
 }
 
 update_home() {
-  mkdir mnt
+  mkdir -p mnt
   mount_partition $1 img$2 mnt
 
   if test -e mnt/home;
