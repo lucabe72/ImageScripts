@@ -3,6 +3,10 @@ set -e
 TARGET_PATH=/home/vrouter
 OUT_DIR=$PWD/Out/Guest
 TMP_DIR=/tmp/BuildGuest
+if [ x$IFACES = x ]
+ then
+  IFACES="eth0-192.168.1.3 eth0:0-192.168.2.3"
+ fi
 
 . $(dirname $0)/utils.sh
 CPUS=$(get_j)
@@ -25,10 +29,15 @@ if [ x$3 != x ];
   GUEST_IMG=$3
   mount_partition $GUEST_IMG img1 /mnt
   sudo mkdir -p /mnt/opt
-  cat > /tmp/bootlocal.sh << EOF
-/sbin/ifconfig eth0 192.168.1.3
-/sbin/ifconfig eth0:1 192.168.2.3
-/sbin/ifconfig eth0 txqueuelen 20000
+  rm -f /tmp/bootlocal.sh
+  for I in $IFACES
+   do
+    NAME=$(echo $I | cut -d '-' -f 1)
+    IP=$(echo $I | cut -d '-' -f 2)
+    echo /sbin/ifconfig $NAME $IP >> /tmp/bootlocal.sh
+    echo /sbin/ifconfig $NAME txqueuelen 20000 >> /tmp/bootlocal.sh
+   done
+  cat >> /tmp/bootlocal.sh << EOF
 echo 1 > /proc/sys/net/ipv4/ip_forward
 EOF
   chmod +x /tmp/bootlocal.sh
