@@ -52,7 +52,12 @@ get_exec_libs() {
   LIBS=$(ldd $1 | cut -f 2 | cut -d ' ' -f 3)
   for L in $LIBS
    do
-    cp $L $2
+     if [ $L = not ]
+      then
+       echo Warning! Not finding some library...
+      else 
+       cp $L $2
+      fi
    done
 }
 

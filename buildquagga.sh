@@ -48,18 +48,29 @@ fetch_lib() {
 
 get_libs64() {
 echo Get libs 64
-  STD_LIBS="libpthread.so libgcc_s.so libc.so librt.so libm.so libdl.so"
+  APPS_BIN=""
+  APPS_SBIN="babeld bgpd ospf6d ospfclient ospfd ripd ripngd watchquagga zebra"
+  PROVIDED_LIBS=""
   LD_LINUX=$(strings $1/sbin/zebra | grep ld-linux)
 
   mkdir -p $1/lib64
 
-  for A in $STD_LIBS
+  for A in $APPS_BIN
    do
-    fetch_lib /lib64/ $A* $1
+    get_exec_libs $1/bin/$A $1/lib64
+   done
+
+  for A in $APPS_SBIN
+   do
+    get_exec_libs $1/sbin/$A $1/lib64
+   done
+
+  for L in $PROVIDED_LIBS
+   do
+    rm -f $1/lib64/$L*
    done
 
   cp $LD_LINUX $1/lib64
-
 }
 
 make_quagga() {
