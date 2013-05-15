@@ -46,6 +46,7 @@ export KVER=$GUEST_KVER
 export ARCH=$GUEST_ARCH
 GUEST_CONFIG=$(get_kernel_config_name $GUEST_KVER $GUEST_ARCH guest)
 sh $SDIR/buildguest.sh $CORE $SDIR/Configs/$GUEST_CONFIG opt1.img $PWD/Out/Guest
+sh $SDIR/buildquagga.sh opt1.img 0.99.22
 sh $SDIR/installguest.sh opt1.img $PWD/Out/Guest test.img
 export KVER=$HOST_KVER
 export ARCH=$HOST_ARCH
