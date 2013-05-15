@@ -50,6 +50,7 @@ get_libs64() {
 echo Get libs 64
   APPS_BIN=""
   APPS_SBIN="babeld bgpd ospf6d ospfclient ospfd ripd ripngd watchquagga zebra"
+  APPS_LIBS="libzebra.so"
   PROVIDED_LIBS=""
   LD_LINUX=$(strings $1/sbin/zebra | grep ld-linux)
 
@@ -63,6 +64,11 @@ echo Get libs 64
   for A in $APPS_SBIN
    do
     get_exec_libs $1/sbin/$A $1/lib64
+   done
+
+  for A in $APPS_LIBS
+   do
+    get_exec_libs $1/lib/$A $1/lib64
    done
 
   for L in $PROVIDED_LIBS
