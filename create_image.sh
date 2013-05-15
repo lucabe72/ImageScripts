@@ -4,7 +4,7 @@ set -e
 
 image_create() {
   echo Creating $1 - size $2MB...
-  dd if=/dev/zero of=$1 count=$2 bs=$((1024*1024))
+  dd if=/dev/zero of=$1 seek=$2 count=0 bs=$((1024*1024))
 }
 
 partitions_create() {
