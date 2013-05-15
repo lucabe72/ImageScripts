@@ -1,7 +1,7 @@
 set -e
 
 TARGET_PATH=/home/vrouter
-OUT_DIR=$PWD/Out/Guest
+OUT_DIR=$4
 TMP_DIR=/tmp/BuildGuest
 if [ x$IFACES = x ]
  then
@@ -43,15 +43,5 @@ EOF
   chmod +x /tmp/bootlocal.sh
   sudo cp /tmp/bootlocal.sh /mnt/opt/bootlocal.sh
   umount_partition /mnt
- fi
 
-#$4: Host image -> Install guest image and stuff in /home/vrouter
-if [ x$4 != x ];
- then
-  mount_partition $4 img5 /mnt
-  sudo mkdir -p /mnt/home/vrouter/Net/Core/boot
-  sudo cp -a $OUT_DIR/core.gz /mnt/home/vrouter/Net/Core/boot
-  sudo cp -a $OUT_DIR/bzImage /mnt/home/vrouter/Net/Core/boot/vmlinuz
-  sudo cp -a $GUEST_IMG /mnt/home/vrouter/Net
-  umount_partition /mnt
  fi
