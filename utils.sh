@@ -56,7 +56,10 @@ get_exec_libs() {
       then
        echo Warning! Not finding some library...
       else 
-       cp $L $2
+       if [ ! -e $2/$(basename $L) ]
+        then
+         cp $L $2
+        fi
       fi
    done
 }
