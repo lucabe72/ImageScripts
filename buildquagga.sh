@@ -46,6 +46,20 @@ fetch_lib() {
    fi
 }
 
+fetch_lib64() {
+  LIB64_DIRS="/lib64/ /lib/x86_64-linux-gnu/"
+  for D in $LIB64_DIRS
+   do
+    if test -e $D;
+     then
+      LIB=$(find $D -name $1)
+      if [ "x$LIB" != "x" ]; then
+        cp $LIB $2/lib64/
+      fi
+     fi
+   done
+}
+
 get_libs64() {
 echo Get libs 64
   APPS_BIN=""
@@ -92,10 +106,8 @@ make_quagga() {
 #    get_libs $1$TARGET_PATH
      echo 32bit
    fi
-  fetch_lib /lib/   libnss_compat* $1$TARGET_PATH
-  fetch_lib /lib/   libnss_files*  $1$TARGET_PATH
-  fetch_lib /lib64/ libnss_compat* $1$TARGET_PATH
-  fetch_lib /lib64/ libnss_files*  $1$TARGET_PATH
+  fetch_lib64 libnss_compat* $1$TARGET_PATH
+  fetch_lib64 libnss_files*  $1$TARGET_PATH
 }
 
 update_home() {
