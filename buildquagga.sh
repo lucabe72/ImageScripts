@@ -37,22 +37,16 @@ install_quagga() {
 }
 
 fetch_lib() {
-  if test -e $1;
+  D=$(ldd /bin/ls | grep libc | cut -f 3 -d ' ' | xargs dirname)
+  LIB=$(find $D -name $2)
+  if [ "x$LIB" != "x" ];
    then
-    LIB=$(find $1 -name $2)
     cp $LIB $3/$1
    else
-    echo Fetch Lib: $1 does not exist - doing nothing
+    echo Fetch Lib: $2 not found in $D - doing nothing
    fi
 }
 
-fetch_lib64() {
-  D=$(ldd /bin/ls | grep libc | cut -f 3 -d ' ' | xargs dirname)
-  LIB=$(find $D -name $1)
-  if [ "x$LIB" != "x" ]; then
-    cp $LIB $2/lib64/
-  fi
-}
 
 get_libs64() {
 echo Get libs 64
@@ -100,8 +94,10 @@ make_quagga() {
 #    get_libs $1$TARGET_PATH
      echo 32bit
    fi
-  fetch_lib64 libnss_compat* $1$TARGET_PATH
-  fetch_lib64 libnss_files*  $1$TARGET_PATH
+  fetch_lib /lib/   libnss_compat* $1$TARGET_PATH
+  fetch_lib /lib/   libnss_files*  $1$TARGET_PATH
+  fetch_lib /lib64/ libnss_compat* $1$TARGET_PATH
+  fetch_lib /lib64/ libnss_files*  $1$TARGET_PATH
 }
 
 update_home() {
