@@ -59,7 +59,6 @@ get_exec_libs() {
        if [ ! -e $2/$(basename $L) ]
         then
          cp $L $2
-         get_exec_libs $L $2
         fi
       fi
    done
