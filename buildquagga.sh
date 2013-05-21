@@ -46,10 +46,25 @@ fetch_lib() {
    fi
 }
 
+fetch_lib64() {
+  LIB64_DIRS="/lib64/ /lib/x86_64-linux-gnu/"
+  for D in $LIB64_DIRS
+   do
+    if test -e $D;
+     then
+      LIB=$(find $D -name $1)
+      if [ "x$LIB" != "x" ]; then
+        cp $LIB $2/lib64/
+      fi
+     fi
+   done
+}
+
 get_libs64() {
 echo Get libs 64
   APPS_BIN=""
   APPS_SBIN="babeld bgpd ospf6d ospfclient ospfd ripd ripngd watchquagga zebra"
+  APPS_LIBS="libzebra.so"
   PROVIDED_LIBS=""
   LD_LINUX=$(strings $1/sbin/zebra | grep ld-linux)
 
@@ -63,6 +78,11 @@ echo Get libs 64
   for A in $APPS_SBIN
    do
     get_exec_libs $1/sbin/$A $1/lib64
+   done
+
+  for A in $APPS_LIBS
+   do
+    get_exec_libs $1/lib/$A $1/lib64
    done
 
   for L in $PROVIDED_LIBS
@@ -86,10 +106,8 @@ make_quagga() {
 #    get_libs $1$TARGET_PATH
      echo 32bit
    fi
-  fetch_lib /lib/   libnss_compat* $1$TARGET_PATH
-  fetch_lib /lib/   libnss_files*  $1$TARGET_PATH
-  fetch_lib /lib64/ libnss_compat* $1$TARGET_PATH
-  fetch_lib /lib64/ libnss_files*  $1$TARGET_PATH
+  fetch_lib64 libnss_compat* $1$TARGET_PATH
+  fetch_lib64 libnss_files*  $1$TARGET_PATH
 }
 
 update_home() {
