@@ -20,12 +20,13 @@ get_exec_libs_root() {
 }
 
 fetch_lib() {
-  if test -e $1;
+  D=$(ldd /bin/ls | grep libc | cut -f 3 -d ' ' | xargs dirname)
+  LIB=$(find $D -name $2)
+  if [ "x$LIB" != "x" ];
    then
-    LIB=$(find $1 -name $2)
     cp $LIB $3/$1
    else
-    echo Fetch Lib: $1 does not exist - doing nothing
+    echo Fetch Lib: $2 not found in $D - doing nothing
    fi
 }
 

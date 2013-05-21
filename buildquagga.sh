@@ -47,17 +47,11 @@ fetch_lib() {
 }
 
 fetch_lib64() {
-  LIB64_DIRS="/lib64/ /lib/x86_64-linux-gnu/"
-  for D in $LIB64_DIRS
-   do
-    if test -e $D;
-     then
+  D=$(ldd /bin/ls | grep libc | cut -f 3 -d ' ' | xargs dirname)
       LIB=$(find $D -name $1)
       if [ "x$LIB" != "x" ]; then
         cp $LIB $2/lib64/
       fi
-     fi
-   done
 }
 
 get_libs64() {
