@@ -48,10 +48,10 @@ fetch_lib() {
 
 fetch_lib64() {
   D=$(ldd /bin/ls | grep libc | cut -f 3 -d ' ' | xargs dirname)
-      LIB=$(find $D -name $1)
-      if [ "x$LIB" != "x" ]; then
-        cp $LIB $2/lib64/
-      fi
+  LIB=$(find $D -name $1)
+  if [ "x$LIB" != "x" ]; then
+    cp $LIB $2/lib64/
+  fi
 }
 
 get_libs64() {
