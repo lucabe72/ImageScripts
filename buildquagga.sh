@@ -90,14 +90,14 @@ make_quagga() {
   if [ $MY_ARCH = x86_64 ];
    then
     get_libs64 $1$TARGET_PATH
+    fetch_lib /lib64/ libnss_compat* $1$TARGET_PATH
+    fetch_lib /lib64/ libnss_files*  $1$TARGET_PATH
    else
 #    get_libs $1$TARGET_PATH
      echo 32bit
+     fetch_lib /lib/   libnss_compat* $1$TARGET_PATH
+     fetch_lib /lib/   libnss_files*  $1$TARGET_PATH
    fi
-  fetch_lib /lib/   libnss_compat* $1$TARGET_PATH
-  fetch_lib /lib/   libnss_files*  $1$TARGET_PATH
-  fetch_lib /lib64/ libnss_compat* $1$TARGET_PATH
-  fetch_lib /lib64/ libnss_files*  $1$TARGET_PATH
 }
 
 update_home() {
