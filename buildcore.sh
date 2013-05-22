@@ -32,6 +32,7 @@ fetch_lib() {
 
 get_bb() {
   tar xvjf $SDIR/busybox-$BBVER.tar.bz2
+  patch_source $SDIR/Patches/BusyBox/$BBVER busybox-$BBVER 
 }
 
 build_bb() {
