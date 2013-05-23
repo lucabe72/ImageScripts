@@ -63,7 +63,7 @@ install_bb() {
   cd ..
 }
 
-#FIXME: Maybe use get_exec_libs busybox?
+#FIXME: Why are this needed? Just for completeness?
 fetch_std_libs() {
   cd $1
   fetch_lib /lib/ libpthread.so.0 _install
@@ -82,8 +82,6 @@ build_root() {
 
   mkdir -p _install/proc
 
-  #FIXME!
-  mkdir -p _install/lib64
   mkdir -p _install/lib
   get_exec_libs_root _install/bin/busybox _install
   cd ..
@@ -124,11 +122,9 @@ install_sudo() {
   cp /tmp/S/bin/sudo $BBBUILD/_install/bin
   get_exec_libs_root $BBBUILD/_install/bin/sudo $BBBUILD/_install
 
+  #FIXME: Check this!
   fetch_lib /lib/   libnss_compat* $BBBUILD/_install
   fetch_lib /lib/   libnss_files*  $BBBUILD/_install
-  fetch_lib /lib64/ libnss_compat* $BBBUILD/_install
-  fetch_lib /lib64/ libnss_files*  $BBBUILD/_install
-
 
   cd ..
 }
