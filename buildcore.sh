@@ -1,7 +1,7 @@
 set -e
 
 SDIR=$(cd -- $(dirname $0) && pwd)
-CFG=$SDIR/Configs/config-busybox-2
+CONFIG_FILE=$SDIR/Configs/config-busybox-2
 BBVER=1.20.2
 
 . $(dirname $0)/utils.sh
@@ -31,22 +31,49 @@ fetch_lib() {
 }
 
 get_bb() {
-  tar xvjf $SDIR/busybox-$BBVER.tar.bz2
-  patch_source $SDIR/Patches/BusyBox/$BBVER busybox-$BBVER 
+  if test -e $1;
+   then
+    echo $1 already exists
+   else
+    if test -e $1.tar.bz2;
+     then
+      echo $1.tar.bz2 already exists
+     else
+      wget http://www.busybox.net/downloads//$1.tar.bz2
+     fi
+    tar xvjf $1.tar.bz2
+   fi
 }
 
 build_bb() {
-  cd busybox-$BBVER
-  cp $CFG .config
-  make oldconfig
-  make -j $CPUS
+  BUILDDIR=$4
+
+  mkdir -p $BUILDDIR
+  cd       $BUILDDIR
+  cp $2 .config
+  make -C $(pwd)/../$1 O=$(pwd) oldconfig
+  make -j $3
+  cd ..
+}
+
+install_bb() {
+  cd $1
   rm -rf _install
   make install
   cd ..
 }
 
+#FIXME: Maybe use get_exec_libs busybox?
+fetch_std_libs() {
+  cd $1
+  fetch_lib /lib/ libpthread.so.0 _install
+  fetch_lib /lib/ librt.so.1 _install
+  fetch_lib /lib/ libdl.so.2 _install
+  cd ..
+}
+
 build_root() {
-  cd busybox-$BBVER
+  cd $1
   cp -a $SDIR/etc _install/etc
   cp $SDIR/sbin/* _install/sbin
   rm -f _install/linuxrc
@@ -62,44 +89,59 @@ build_root() {
   cd ..
 }
 
+#FIXME!
 get_sudo() {
-  tar xvzf $SDIR/sudo-1.7.10p3.tar.gz
+  if test -e $1;
+   then
+    echo $1 already exists
+   else
+    if test -e $1.tar.gz;
+     then
+      echo $1.tar.gz already exists
+     else
+      wget http://www.sudo.ws/sudo/dist/$1.tar.gz
+     fi
+    tar xvzf $1.tar.gz
+   fi
 }
 
 build_sudo() {
-  cd sudo-1.7.10p3
-  ./configure --prefix=/ --disable-authentication --disable-shadow --disable-pam-session --disable-zlib --without-lecture --without-sendmail --without-umask --without-interfaces --without-pam
-  make -j $CPUS
+  BUILDDIR=$3
+
+  mkdir -p $BUILDDIR
+  cd       $BUILDDIR
+  ../$1/configure --prefix=/ --disable-authentication --disable-shadow --disable-pam-session --disable-zlib --without-lecture --without-sendmail --without-umask --without-interfaces --without-pam
+  make -j $2
   cd ..
 }
 
 install_sudo() {
-  cd sudo-1.7.10p3
+  BBBUILD=$2
+
+  cd $1
   rm -rf /tmp/S
   make DESTDIR=/tmp/S install
-  cp /tmp/S/bin/sudo ../busybox-$BBVER/_install/bin
-  get_exec_libs_root ../busybox-$BBVER/_install/bin/sudo ../busybox-$BBVER/_install
+  cp /tmp/S/bin/sudo $BBBUILD/_install/bin
+  get_exec_libs_root $BBBUILD/_install/bin/sudo $BBBUILD/_install
 
-  fetch_lib /lib/   libnss_compat* ../busybox-$BBVER/_install
-  fetch_lib /lib/   libnss_files*  ../busybox-$BBVER/_install
-  fetch_lib /lib64/ libnss_compat* ../busybox-$BBVER/_install
-  fetch_lib /lib64/ libnss_files*  ../busybox-$BBVER/_install
+  fetch_lib /lib/   libnss_compat* $BBBUILD/_install
+  fetch_lib /lib/   libnss_files*  $BBBUILD/_install
+  fetch_lib /lib64/ libnss_compat* $BBBUILD/_install
+  fetch_lib /lib64/ libnss_files*  $BBBUILD/_install
+
 
   cd ..
 }
 
-get_bb
-build_bb
-build_root
+get_bb		busybox-$BBVER
+patch_source	$SDIR/Patches/BusyBox/$BBVER busybox-$BBVER 
+build_bb	busybox-$BBVER $CONFIG_FILE $CPUS bb_build-$BBVER
+install_bb	bb_build-$BBVER
+build_root	bb_build-$BBVER
+fetch_std_libs	bb_build-$BBVER
 
-cd busybox-$BBVER
-fetch_lib /lib/ libpthread.so.0 _install
-fetch_lib /lib/ librt.so.1 _install
-fetch_lib /lib/ libdl.so.2 _install
-cd ..
+get_sudo	sudo-1.7.10p3
+build_sudo	sudo-1.7.10p3 $CPUS sudo_build-1.7.10p3
+install_sudo	sudo_build-1.7.10p3 $(pwd)/bb_build-$BBVER
 
-get_sudo
-build_sudo
-install_sudo
-
-mk_initramfs busybox-$BBVER/_install $1 NoSUDO
+mk_initramfs bb_build-$BBVER/_install $1 NoSUDO
