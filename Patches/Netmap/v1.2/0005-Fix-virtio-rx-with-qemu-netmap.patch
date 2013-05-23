@@ -1,0 +1,25 @@
+From 691bb64b79976917df047ccc42cf9dedddf1f507 Mon Sep 17 00:00:00 2001
+From: luca <luca@vrouter-laptop.(none)>
+Date: Tue, 4 Sep 2012 12:16:39 +0200
+Subject: [PATCH 5/5] Fix virtio rx with qemu-netmap
+
+---
+ net/qemu-netmap.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/qemu-netmap.c b/net/qemu-netmap.c
+index e2b6eb3..eeed8a9 100644
+--- a/net/qemu-netmap.c
++++ b/net/qemu-netmap.c
+@@ -355,7 +355,7 @@ RATE_ME(__FUNCTION__, 1000000, 1);
+ 		__FUNCTION__, s->me.ifname, ring->cur, ring->avail);
+     ring->cur = NETMAP_RING_NEXT(ring, i);
+     ring->avail--;
+-    //netmap_read_poll(s, 1); // XXX only if avail == 0 ?
++    netmap_read_poll(s, 1); // XXX only if avail == 0 ?
+ }
+ 
+ /*
+-- 
+1.7.9.5
+
