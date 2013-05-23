@@ -19,7 +19,7 @@ while getopts 48cknq:v: opt
     8)		GUEST_ARCH=x86_64;;
     c)		CORE=$(pwd)/test.gz;;
     k)		KEEPIMAGE=YesPlease;;
-    n)		KVM_PATCHES=Patches/Netmap/kvm-git;;
+    n)		KVM_PATCHES=Patches/Netmap/qemu-kvm-git;;
     q)		KVM_NAME=$OPTARG;;
     v)		HOST_KVER=$OPTARG;;
     [?])	print >&2 "Usage: $0 [-4]"
