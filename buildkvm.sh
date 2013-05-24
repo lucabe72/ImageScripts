@@ -45,8 +45,9 @@ get_kvm() {
 }
 
 build_kvm() {
-  cd $3
-  LDFLAGS=-lrt ./configure --prefix=$1 --disable-docs
+  mkdir $4
+  cd $4
+  LDFLAGS=-lrt ../$3/configure --prefix=$1 --disable-docs --target-list="i386-softmmu x86_64-softmmu"
   make -j $2
   cd ..
 }
@@ -87,8 +88,8 @@ echo Get libs 64
 make_kvm() {
   PROVIDED_LIBS="libpthread.so libgcc_s.so libc.so librt.so libstdc++.so libm.so libdl.so"
   get_kvm $2 $3
-  build_kvm /home/$VRUSER/Public-KVM-Test $CPUS $2
-  install_kvm $1 $2
+  build_kvm /home/$VRUSER/Public-KVM-Test $CPUS $2 build-$2
+  install_kvm $1 build-$2
   MY_ARCH=$(arch)
   if [ $MY_ARCH = x86_64 ];
    then
