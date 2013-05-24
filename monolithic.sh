@@ -19,7 +19,7 @@ while getopts 48cknq:v: opt
     8)		GUEST_ARCH=x86_64;;
     c)		CORE=$(pwd)/test.gz;;
     k)		KEEPIMAGE=YesPlease;;
-    n)		KVM_PATCHES=Patches/Netmap/qemu-kvm-git;;
+    n)		NETMAP_PATCH=YesPlease;;
     q)		KVM_NAME=$OPTARG;;
     v)		HOST_KVER=$OPTARG;;
     [?])	print >&2 "Usage: $0 [-4]"
@@ -33,6 +33,18 @@ if test -e $CORE;
  else
   echo Building $CORE
   sh $SDIR/buildcore.sh $CORE
+ fi
+
+if [ $NETMAP_PATCH = YesPlease ]
+ then
+  if [ $KVM_NAME = qemu-kvm-git ]
+   then
+    KVM_PATCHES=Patches/Netmap/qemu-kvm-git
+   else
+    Q_MAJ=$(echo $KVM_NAME | cut -f 2 -d '-' | cut -d '.' -f 1)
+    Q_MIN=$(echo $KVM_NAME | cut -f 2 -d '-' | cut -d '.' -f 2)
+    KVM_PATCHES=Patches/Netmap/v$Q_MAJ.$Q_MIN
+   fi
  fi
 
 export EXTRAKNAME
