@@ -22,7 +22,8 @@ get_intel_drivers() {
      else
 #      echo Please download $1.tar.gz from somewhere, and put it here
 #      exit
-       cp $SDIR/$1.tar.gz .
+#       cp $SDIR/$1.tar.gz .
+      wget http://downloads.sourceforge.net/e1000/$1.tar.gz
      fi
     tar xvzf $1.tar.gz
    fi
