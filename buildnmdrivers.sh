@@ -2,7 +2,7 @@ set -e
 
 SDIR=$(cd -- $(dirname $0) && pwd)
 
-DVER=2.2.14
+DVER=2.3.2
 KVER=3.4.14
 EXTRAKNAME="-vrhost"
 BUILD_DIR=build-host$KVER$EXTRAKNAME
