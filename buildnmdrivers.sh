@@ -6,6 +6,7 @@ DVER=2.2.14
 KVER=3.4.14
 EXTRAKNAME="-vrhost"
 BUILD_DIR=build-host$KVER$EXTRAKNAME
+OUT=Out/netmap-drivers
 
 . $(dirname $0)/utils.sh
 CPUS=$(get_j)
@@ -66,6 +67,7 @@ cp $SDIR/if_e1000e_netmap.h e1000e-$DVER/src
 tar xvzf $SDIR/nm-module.tgz
 build_netmap netmap-module e1000e-$DVER
 
-cp netmap-module/LINUX/netmap_lin.ko .
-cp e1000e-$DVER/src/e1000e.ko        .
+mkdir -p                             $OUT
+cp netmap-module/LINUX/netmap_lin.ko $OUT
+cp e1000e-$DVER/src/e1000e.ko        $OUT
 
