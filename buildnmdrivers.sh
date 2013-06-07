@@ -38,7 +38,7 @@ get_version_from_name() {
 
 build_netmap() {
   cd $1/LINUX
-  make KSRC=$(pwd)/../../build-host$KVER$EXTRAKNAME DRIVERS=../../$2/src/
+  make -j$3 -C $(pwd)/../../build-host$KVER$EXTRAKNAME M=$(pwd) DRIVERS=../../$2/src/ modules
   cd ../..
 }
 
@@ -65,7 +65,7 @@ cp $SDIR/if_e1000e_netmap.h e1000e-$DVER/src
 #cd ..
 
 tar xvzf $SDIR/nm-module.tgz
-build_netmap netmap-module e1000e-$DVER
+build_netmap netmap-module e1000e-$DVER $CPUS
 
 mkdir -p                             $OUT
 cp netmap-module/LINUX/netmap_lin.ko $OUT
