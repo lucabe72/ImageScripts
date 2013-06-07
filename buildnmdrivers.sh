@@ -19,8 +19,9 @@ get_intel_drivers() {
      then
       echo $1.tar.gz already exists
      else
-      echo Please download $1.tar.gz from somewhere, and put it here
-      exit
+#      echo Please download $1.tar.gz from somewhere, and put it here
+#      exit
+       cp $SDIR/$1.tar.gz .
      fi
     tar xvzf $1.tar.gz
    fi
