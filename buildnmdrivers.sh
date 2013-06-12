@@ -39,7 +39,8 @@ get_version_from_name() {
 
 build_netmap() {
   cd $1/LINUX
-  make -j$3 -C $(pwd)/../../build-host$KVER$EXTRAKNAME M=$(pwd) DRIVERS=../../$2/src/ modules
+  EXTRA="-I$(pwd) -I$(pwd)/../sys -I$(pwd)/../sys/dev -DCONFIG_NETMAP"
+  make -j$3 -C $(pwd)/../../build-host$KVER$EXTRAKNAME M=$(pwd) DRIVERS=../../$2/src/ EXTRA_CFLAGS="$EXTRA" modules
   cd ../..
 }
 
