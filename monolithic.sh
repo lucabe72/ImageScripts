@@ -19,7 +19,7 @@ while getopts 48cknq:v: opt
     8)		GUEST_ARCH=x86_64;;
     c)		CORE=$(pwd)/test.gz;;
     k)		KEEPIMAGE=YesPlease;;
-    n)		NETMAP_PATCH=YesPlease;;
+    n)		NETMAP_PATCH=YesPlease; HOST_KVER=3.0.36;;
     q)		KVM_NAME=$OPTARG;;
     v)		HOST_KVER=$OPTARG;;
     [?])	print >&2 "Usage: $0 [-4]"
@@ -64,4 +64,8 @@ export KVER=$HOST_KVER
 export ARCH=$HOST_ARCH
 HOST_CONFIG=$(get_kernel_config_name $HOST_KVER $HOST_ARCH host)
 sh $SDIR/buildhostlin.sh $CORE $SDIR/Configs/$HOST_CONFIG test.img
+if [ $NETMAP_PATCH = YesPlease ]
+ then
+  sh $SDIR/buildnmdrivers.sh
+ fi
 sh $SDIR/buildkvm.sh test.img $KVM_NAME $KVM_PATCHES 
