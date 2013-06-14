@@ -31,6 +31,7 @@ format_partition() {
   echo Creating a FS on the partition...
   sudo /sbin/losetup --offset $START --sizelimit $SIZE /dev/loop0 $1
   sudo /sbin/mkfs.ext3 /dev/loop0
+  sleep 1
   sudo /sbin/losetup -d /dev/loop0
 }
 
@@ -51,7 +52,15 @@ get_exec_libs() {
   LIBS=$(ldd $1 | cut -f 2 | cut -d ' ' -f 3)
   for L in $LIBS
    do
-    cp $L $2
+     if [ $L = not ]
+      then
+       echo Warning! Not finding some library...
+      else 
+       if [ ! -e $2/$(basename $L) ]
+        then
+         cp $L $2
+        fi
+      fi
    done
 }
 
@@ -66,10 +75,18 @@ extract_initramfs() {
 }
 
 mk_initramfs() {
-  echo MkInitRAMFs $1 $2
+  if [ x$3 != x ];
+   then
+    SUDO=""
+    echo MkInitRAMFs $1 $2 NoSUDO
+   else
+    SUDO=sudo
+    echo MkInitRAMFs $1 $2 SUDO
+   fi
+  
   HERE=$PWD
   cd $1
-  sudo find . | sudo cpio -o -H newc | gzip > $2
+  $SUDO find . | $SUDO cpio -o -H newc | gzip > $2
   cd $HERE
 }
 
@@ -80,6 +97,26 @@ update_initramfs()
   sudo mkdir -p $2/tmproot/lib/modules
   sudo cp -r    $2/lib/modules/* $2/tmproot/lib/modules
   mk_initramfs  $2/tmproot $3/core.gz
+}
+
+get_kernel_config_name()
+{
+  MAJ=$(echo $1 | cut -d '.' -f 1)
+  MIN=$(echo $1 | cut -d '.' -f 2)
+  V=$MAJ.$MIN
+
+  if [ $2 = x86 ]
+   then
+    B=32
+   else if [ $2 = x86_64 ]
+     then
+      B=64
+     else
+      B=unknown
+     fi
+   fi
+
+  echo config-$V-$3-$B
 }
 
 get_kernel_path() {

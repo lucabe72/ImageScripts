@@ -1,0 +1,50 @@
+From c0d7c00b4793d6ba6f1539dff1be276e4c2d34f0 Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Tue, 22 May 2012 15:05:08 +0200
+Subject: [PATCH 30/48] sched-dl: use u128 ops inside dl_entity_overflow.
+
+---
+ kernel/sched/dl.c |   12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/kernel/sched/dl.c b/kernel/sched/dl.c
+index 56041c5..5724ccb 100644
+--- a/kernel/sched/dl.c
++++ b/kernel/sched/dl.c
+@@ -14,6 +14,7 @@
+  *                    Michael Trimarchi <michael@amarulasolutions.com>,
+  *                    Fabio Checconi <fabio@gandalf.sssup.it>
+  */
++#include <linux/math128.h>
+ #include "sched.h"
+ 
+ struct dl_bandwidth def_dl_bandwidth;
+@@ -361,7 +362,7 @@ static void replenish_dl_entity(struct sched_dl_entity *dl_se,
+ static bool dl_entity_overflow(struct sched_dl_entity *dl_se,
+ 			       struct sched_dl_entity *pi_se, u64 t)
+ {
+-	u64 left, right;
++	u128 left, right;
+ 
+ 	/*
+ 	 * left and right are the two sides of the equation above,
+@@ -376,10 +377,13 @@ static bool dl_entity_overflow(struct sched_dl_entity *dl_se,
+ 	 * to the (absolute) deadline. Therefore, overflowing the u64
+ 	 * type is very unlikely to occur in both cases.
+ 	 */
+-	left = pi_se->dl_deadline * dl_se->runtime;
+-	right = (dl_se->deadline - t) * pi_se->dl_runtime;
++	left = mul_u64_u64(pi_se->dl_period, dl_se->runtime);
++	right = mul_u64_u64((dl_se->deadline - t), pi_se->dl_runtime);
+ 
+-	return dl_time_before(right, left);
++	if (cmp_u128(left, right) > 0)
++		return true;
++	
++	return false; 
+ }
+ 
+ /*
+-- 
+1.7.9.5
+

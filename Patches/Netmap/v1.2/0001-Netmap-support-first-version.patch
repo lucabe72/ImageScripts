@@ -1,23 +1,23 @@
-From 17b0eb3364e092ed1897c745207cb9cf318e2de2 Mon Sep 17 00:00:00 2001
-From: luca abeni <luca@utopia.(none)>
-Date: Thu, 13 Dec 2012 11:12:27 +0000
-Subject: [PATCH 1/2] Netmap support, first version
+From 2d370f20eb51351eab1842322ae744caf08e20ee Mon Sep 17 00:00:00 2001
+From: luca <luca@vrouter-laptop.(none)>
+Date: Fri, 31 Aug 2012 13:33:55 +0200
+Subject: [PATCH 1/5] Netmap support, first version
 
 ---
  net.c             |    4 +-
  net/Makefile.objs |    1 +
- net/clients.h     |    5 +
- net/qemu-netmap.c |  482 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ net/qemu-netmap.c |  481 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ net/tap.h         |    3 +
  qapi-schema.json  |    1 +
  qemu-common.h     |   24 +++
- 6 files changed, 516 insertions(+), 1 deletion(-)
+ 6 files changed, 513 insertions(+), 1 deletion(-)
  create mode 100644 net/qemu-netmap.c
 
 diff --git a/net.c b/net.c
-index e8ae13e..30db1a0 100644
+index 60043dd..2e741b8 100644
 --- a/net.c
 +++ b/net.c
-@@ -607,6 +607,7 @@ static int (* const net_client_init_fun[NET_CLIENT_OPTIONS_KIND_MAX])(
+@@ -612,6 +612,7 @@ static int (* const net_client_init_fun[NET_CLIENT_OPTIONS_KIND_MAX])(
  #ifdef CONFIG_SLIRP
          [NET_CLIENT_OPTIONS_KIND_USER]      = net_init_slirp,
  #endif
@@ -25,7 +25,7 @@ index e8ae13e..30db1a0 100644
          [NET_CLIENT_OPTIONS_KIND_TAP]       = net_init_tap,
          [NET_CLIENT_OPTIONS_KIND_SOCKET]    = net_init_socket,
  #ifdef CONFIG_VDE
-@@ -638,6 +639,7 @@ static int net_client_init1(const void *object, int is_netdev, Error **errp)
+@@ -643,6 +644,7 @@ static int net_client_init1(const void *object, int is_netdev, Error **errp)
  #ifdef CONFIG_SLIRP
          case NET_CLIENT_OPTIONS_KIND_USER:
  #endif
@@ -33,7 +33,7 @@ index e8ae13e..30db1a0 100644
          case NET_CLIENT_OPTIONS_KIND_TAP:
          case NET_CLIENT_OPTIONS_KIND_SOCKET:
  #ifdef CONFIG_VDE
-@@ -725,7 +727,7 @@ int net_client_init(QemuOpts *opts, int is_netdev, Error **errp)
+@@ -730,7 +732,7 @@ int net_client_init(QemuOpts *opts, int is_netdev, Error **errp)
  static int net_host_check_device(const char *device)
  {
      int i;
@@ -54,28 +54,12 @@ index cf04187..80bb797 100644
  common-obj-$(CONFIG_LINUX) += tap-linux.o
  common-obj-$(CONFIG_WIN32) += tap-win32.o
  common-obj-$(CONFIG_BSD) += tap-bsd.o
-diff --git a/net/clients.h b/net/clients.h
-index c58cc60..6482266 100644
---- a/net/clients.h
-+++ b/net/clients.h
-@@ -41,6 +41,11 @@ int net_init_hubport(const NetClientOptions *opts, const char *name,
- int net_init_socket(const NetClientOptions *opts, const char *name,
-                     NetClientState *peer);
- 
-++#if 1 // DEV_NETMAP
-++int net_init_netmap(const NetClientOptions *opts, const char *name,
-+                     NetClientState *peer);
-++#endif // DEV_NETMAP
-+
- int net_init_tap(const NetClientOptions *opts, const char *name,
-                  NetClientState *peer);
- 
 diff --git a/net/qemu-netmap.c b/net/qemu-netmap.c
 new file mode 100644
-index 0000000..72e5724
+index 0000000..e2b6eb3
 --- /dev/null
 +++ b/net/qemu-netmap.c
-@@ -0,0 +1,482 @@
+@@ -0,0 +1,481 @@
 +/*
 + * netmap access for qemu (from tap-bsd.c and tap.c)
 + *
@@ -119,7 +103,6 @@ index 0000000..72e5724
 +#include <net/if.h>
 +
 +#include "net.h"
-+#include "clients.h"
 +#include "sysemu.h"
 +#include "qemu-char.h"
 +#include "qemu-common.h"
@@ -558,11 +541,25 @@ index 0000000..72e5724
 +
 +    return 0;
 +}
+diff --git a/net/tap.h b/net/tap.h
+index 0fb018c..77d5f52 100644
+--- a/net/tap.h
++++ b/net/tap.h
+@@ -32,6 +32,9 @@
+ #define DEFAULT_NETWORK_SCRIPT "/etc/qemu-ifup"
+ #define DEFAULT_NETWORK_DOWN_SCRIPT "/etc/qemu-ifdown"
+ 
++#if 1 // DEV_NETMAP
++int net_init_netmap(const NetClientOptions *opts, const char *name, NetClientState *peer);
++#endif // DEV_NETMAP
+ int net_init_tap(const NetClientOptions *opts, const char *name,
+                  NetClientState *peer);
+ 
 diff --git a/qapi-schema.json b/qapi-schema.json
-index 5dfa052..55bdcf7 100644
+index bd8ad74..708e7d2 100644
 --- a/qapi-schema.json
 +++ b/qapi-schema.json
-@@ -2584,6 +2584,7 @@
+@@ -2229,6 +2229,7 @@
      'none':     'NetdevNoneOptions',
      'nic':      'NetLegacyNicOptions',
      'user':     'NetdevUserOptions',
@@ -571,10 +568,10 @@ index 5dfa052..55bdcf7 100644
      'socket':   'NetdevSocketOptions',
      'vde':      'NetdevVdeOptions',
 diff --git a/qemu-common.h b/qemu-common.h
-index cef264c..8629641 100644
+index e5c2bcd..e19fc3a 100644
 --- a/qemu-common.h
 +++ b/qemu-common.h
-@@ -50,6 +50,30 @@ typedef struct MigrationParams MigrationParams;
+@@ -40,6 +40,30 @@ typedef struct MigrationParams MigrationParams;
  #include <signal.h>
  #include <glib.h>
  

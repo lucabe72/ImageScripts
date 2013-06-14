@@ -1,9 +1,10 @@
 set -e
 
+SDIR=$(cd -- $(dirname $0) && pwd)
 PARTITION_NAME=VRouter
 VRUSER=vrouter
 TMP_DIR=/tmp/KVM
-SCRIPTS_REPO=http://www.disi.unitn.it/~abeni/PublicGits/Sfingi/VRouter-Scripts.git
+SCRIPTS_REPO=git://github.com/lucabe72/VRouter-Scripts.git
 
 . $(dirname $0)/utils.sh
 CPUS=$(get_j)
@@ -24,19 +25,29 @@ get_kvm() {
   if test -e $1;
    then
     echo KVM already exists
-   else
-    tar xvzf $(dirname $0)/$1.tgz
+   else if test -e $SDIR/$1.tgz;
+     then 
+      tar xvzf $SDIR/$1.tgz
+     else if test -e $1.tar.bz2
+       then
+        echo $1.tar.bz2 already exists
+       else
+        wget http://wiki.qemu-project.org/download/$1.tar.bz2
+       fi
+      tar xvjf $1.tar.bz2
+     fi
    fi
   if [ x$2 != x ]
    then
-    patch_source $(dirname $0)/$2 $1
-    cp $(dirname $0)/Patches/Netmap/*.h $1	#FIXME?
+    patch_source $SDIR/$2 $1
+    cp $SDIR/Patches/Netmap/*.h $1	#FIXME?
    fi
 }
 
 build_kvm() {
-  cd $3
-  ./configure --prefix=$1
+  mkdir $4
+  cd $4
+  LDFLAGS=-lrt ../$3/configure --prefix=$1 --disable-docs --target-list="i386-softmmu x86_64-softmmu"
   make -j $2
   cd ..
 }
@@ -77,8 +88,8 @@ echo Get libs 64
 make_kvm() {
   PROVIDED_LIBS="libpthread.so libgcc_s.so libc.so librt.so libstdc++.so libm.so libdl.so"
   get_kvm $2 $3
-  build_kvm /home/$VRUSER/Public-KVM-Test $CPUS $2
-  install_kvm $1 $2
+  build_kvm /home/$VRUSER/Public-KVM-Test $CPUS $2 build-$2
+  install_kvm $1 build-$2
   MY_ARCH=$(arch)
   if [ $MY_ARCH = x86_64 ];
    then
@@ -147,7 +158,7 @@ cp VRouter-Scripts/*   $TMP_DIR/home/$VRUSER/Net
 #cp $1 $OUT_DIR/opt1.img
 #IMG=$OUT_DIR/opt1.img
 IMG=$1
-cp $(dirname $0)/bin/* $TMP_DIR/home/$VRUSER/bin
+cp $SDIR/bin/* $TMP_DIR/home/$VRUSER/bin
 if test -e bin;
  then
   cp bin/*             $TMP_DIR/home/$VRUSER/bin

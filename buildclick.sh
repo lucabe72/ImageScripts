@@ -108,7 +108,7 @@ get_libs() {
 
   for L in $PROVIDED_LIBS
    do
-    rm $1/lib/$L*
+    rm -f $1/lib/$L*
    done
 }
 
@@ -133,7 +133,7 @@ echo Get libs 64
 
   for L in $PROVIDED_LIBS
    do
-    rm $1/lib64/$L*
+    rm -f $1/lib64/$L*
    done
 
   cp $LD_LINUX $1/lib64

@@ -1,0 +1,53 @@
+From c9b2945a16154ac3b9d69a757dd9b367e81e7a92 Mon Sep 17 00:00:00 2001
+From: Fabio Checconi <fchecconi@gmail.com>
+Date: Tue, 22 May 2012 23:10:38 +0200
+Subject: [PATCH 31/48] sched-dl: doc typos fixed.
+
+---
+ Documentation/scheduler/sched-deadline.txt |   19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
+
+diff --git a/Documentation/scheduler/sched-deadline.txt b/Documentation/scheduler/sched-deadline.txt
+index ea8477f..7f11994 100644
+--- a/Documentation/scheduler/sched-deadline.txt
++++ b/Documentation/scheduler/sched-deadline.txt
+@@ -35,12 +35,12 @@ CONTENTS
+ 2. Task scheduling
+ ==================
+ 
+- The typical -deadline task will be made up of a computation phase (instance)
++ The typical -deadline task is composed of a computation phase (instance)
+  which is activated on a periodic or sporadic fashion. The expected (maximum)
+  duration of such computation is called the task's runtime; the time interval
+  by which each instance needs to be completed is called the task's relative
+  deadline. The task's absolute deadline is dynamically calculated as the
+- time instant a task (better, an instance) activates plus the relative
++ time instant a task (or, more properly) activates plus the relative
+  deadline.
+ 
+  The EDF[1] algorithm selects the task with the smallest absolute deadline as
+@@ -147,9 +147,18 @@ someone must call sched_setscheduler2() on it, or it won't even start.
+ 3. Future plans
+ ===============
+ 
+-Still Missing:
++Still missing:
+ 
+  - refinements to deadline inheritance, especially regarding the possibility
+    of retaining bandwidth isolation among non-interacting tasks. This is
+-   being studied from both theoretical and practical point of views, and
+-   hopefully we can have some demonstrative code soon.
++   being studied from both theoretical and practical points of view, and
++   hopefully we should be able to produce some demonstrative code soon.
++ - (c)group based bandwidth management, and maybe scheduling;
++ - access control for non-root users (and related security concerns to
++   address), which is the best way to allow unprivileged use of the mechanisms
++   and how to prevent non-root users "cheat" the system?
++
++As already discussed, we are planning also to merge this work with the EDF
++throttling patches [https://lkml.org/lkml/2010/2/23/239] but we still are in
++the preliminary phases of the merge and we really seek feedback that would help us
++decide on the direction it should take.
+-- 
+1.7.9.5
+

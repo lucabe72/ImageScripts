@@ -4,6 +4,7 @@ if [ -f /var/log/autologin ] ; then
     exec login
 else
     touch /var/log/autologin
-    exec login -f root
+    USER=$(cat /etc/sysconfig/user)
+    exec login -f $USER
 fi
 sleep 60

@@ -1,0 +1,26 @@
+From 98678e2d20feee854957a24cc3ee8991f9f4250a Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Wed, 2 May 2012 17:19:49 +0200
+Subject: [PATCH 24/48] add control for -dl tasks in sched_setscheduler
+
+---
+ kernel/sched/core.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/sched/core.c b/kernel/sched/core.c
+index ee61203..710b65b 100644
+--- a/kernel/sched/core.c
++++ b/kernel/sched/core.c
+@@ -4007,7 +4007,8 @@ recheck:
+ 	 * If not changing anything there's no need to proceed further:
+ 	 */
+ 	if (unlikely(policy == p->policy && (!rt_policy(policy) ||
+-			param->sched_priority == p->rt_priority))) {
++			param->sched_priority == p->rt_priority) &&
++			!dl_policy(policy))) {
+ 		task_rq_unlock(rq, p, &flags);
+ 		return 0;
+ 	}
+-- 
+1.7.9.5
+

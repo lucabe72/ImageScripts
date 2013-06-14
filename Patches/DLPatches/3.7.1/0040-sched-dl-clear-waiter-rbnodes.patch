@@ -1,0 +1,55 @@
+From 0ee21ee71776abf8c520cd3b0791654725c24e15 Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Tue, 30 Oct 2012 17:40:59 -0700
+Subject: [PATCH 40/48] sched-dl: clear waiter rbnodes
+
+rb_init_node has been removed, but waiters rbnodes must be
+properly cleared when first used.
+---
+ kernel/futex.c         |    2 ++
+ kernel/rtmutex-debug.c |    2 --
+ kernel/rtmutex.c       |    2 ++
+ 3 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/kernel/futex.c b/kernel/futex.c
+index 20ef219..0a4441d 100644
+--- a/kernel/futex.c
++++ b/kernel/futex.c
+@@ -2296,6 +2296,8 @@ static int futex_wait_requeue_pi(u32 __user *uaddr, unsigned int flags,
+ 	 * code while we sleep on uaddr.
+ 	 */
+ 	debug_rt_mutex_init_waiter(&rt_waiter);
++	RB_CLEAR_NODE(&rt_waiter.pi_tree_entry);
++	RB_CLEAR_NODE(&rt_waiter.tree_entry);
+ 	rt_waiter.task = NULL;
+ 
+ 	ret = get_futex_key(uaddr2, flags & FLAGS_SHARED, &key2, VERIFY_WRITE);
+diff --git a/kernel/rtmutex-debug.c b/kernel/rtmutex-debug.c
+index 0f339ca..41c18f5 100644
+--- a/kernel/rtmutex-debug.c
++++ b/kernel/rtmutex-debug.c
+@@ -153,8 +153,6 @@ void debug_rt_mutex_proxy_unlock(struct rt_mutex *lock)
+ void debug_rt_mutex_init_waiter(struct rt_mutex_waiter *waiter)
+ {
+ 	memset(waiter, 0x11, sizeof(*waiter));
+-	RB_CLEAR_NODE(&waiter->pi_tree_entry);
+-	RB_CLEAR_NODE(&waiter->tree_entry);
+ 	waiter->deadlock_task_pid = NULL;
+ }
+ 
+diff --git a/kernel/rtmutex.c b/kernel/rtmutex.c
+index 7187c50..b42aae1 100644
+--- a/kernel/rtmutex.c
++++ b/kernel/rtmutex.c
+@@ -720,6 +720,8 @@ rt_mutex_slowlock(struct rt_mutex *lock, int state,
+ 	int ret = 0;
+ 
+ 	debug_rt_mutex_init_waiter(&waiter);
++	RB_CLEAR_NODE(&waiter.pi_tree_entry);
++	RB_CLEAR_NODE(&waiter.tree_entry);
+ 
+ 	raw_spin_lock(&lock->wait_lock);
+ 
+-- 
+1.7.9.5
+

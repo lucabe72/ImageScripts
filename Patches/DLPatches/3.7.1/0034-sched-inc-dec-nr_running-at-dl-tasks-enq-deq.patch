@@ -1,0 +1,37 @@
+From 036c2b581e5c8ce9e780647afdc57c036832b80e Mon Sep 17 00:00:00 2001
+From: Juri Lelli <juri.lelli@gmail.com>
+Date: Mon, 8 Oct 2012 11:25:46 -0700
+Subject: [PATCH 34/48] sched: inc/dec nr_running at -dl tasks enq/deq
+
+Correctly updates to rq->nr_running is scheduling classes
+liability. Aling to what changes this commit introduced:
+https://patchwork.kernel.org/patch/1065512/
+---
+ kernel/sched/dl.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/kernel/sched/dl.c b/kernel/sched/dl.c
+index 5ffb6ba..c9300d8 100644
+--- a/kernel/sched/dl.c
++++ b/kernel/sched/dl.c
+@@ -822,6 +822,8 @@ static void enqueue_task_dl(struct rq *rq, struct task_struct *p, int flags)
+ 
+ 	if (!task_current(rq, p) && p->nr_cpus_allowed > 1)
+ 		enqueue_pushable_dl_task(rq, p);
++
++	inc_nr_running(rq);
+ }
+ 
+ static void __dequeue_task_dl(struct rq *rq, struct task_struct *p, int flags)
+@@ -834,6 +836,8 @@ static void dequeue_task_dl(struct rq *rq, struct task_struct *p, int flags)
+ {
+ 	update_curr_dl(rq);
+ 	__dequeue_task_dl(rq, p, flags);
++
++	dec_nr_running(rq);
+ }
+ 
+ /*
+-- 
+1.7.9.5
+
