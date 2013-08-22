@@ -83,6 +83,7 @@ build_root() {
   mkdir -p _install/proc
 
   mkdir -p _install/lib
+  mkdir -p _install/lib64
   get_exec_libs_root _install/bin/busybox _install
   cd ..
 }
