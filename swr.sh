@@ -60,10 +60,20 @@ get_rt_patch() {
   MAJ=$(echo $1 | cut -d '.' -f 1)
   MIN=$(echo $1 | cut -d '.' -f 2)
   VER_PREFIX=$MAJ.$MIN
-  wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/patch-$1-$2.patch.bz2
-  bunzip2 patch-$1-$2.patch.bz2
+  RTVER=$(echo $2 | cut -d '-' -f 1)
+  FEAT=$(echo $2 | cut -d '-' -f 2)
   mkdir -p $3
-  mv patch-$1-$2.patch $3
+  if [ $FEAT != $RTVER ]
+   then
+    echo RT: $2 Feat: $FEAT
+    wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/features/patch-$1-$2.patch.bz2
+    bunzip2 patch-$1-$2.patch.bz2
+    mv patch-$1-$2.patch $3/1patch-$1-$2.patch
+    VER_PREFIX="$VER_PREFIX/older"
+   fi
+  wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/patch-$1-$RTVER.patch.bz2
+  bunzip2 patch-$1-$RTVER.patch.bz2
+  mv patch-$1-$RTVER.patch $3/0patch-$1-$RTVER.patch
 }
 
 build_nena_drivers() {
