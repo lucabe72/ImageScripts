@@ -53,6 +53,12 @@ EOF
   rm -rf mnt
 }
 
+download_rt_patch() {
+  wget https://www.kernel.org/pub/linux/kernel/projects/rt/$1/patch-$2.patch.bz2 || wget https://www.kernel.org/pub/linux/kernel/projects/rt/$1/older/patch-$2.patch.bz2
+  bunzip2 patch-$2.patch.bz2
+  mv patch-$2.patch $3
+}
+
 get_rt_patch() {
 #  wget https://www.kernel.org/pub/linux/kernel/projects/rt/3.10/patches-3.10.6-rt3.tar.bz2
 #  tar xvjf patches-3.10.6-rt3.tar.bz2
@@ -66,14 +72,16 @@ get_rt_patch() {
   if [ $FEAT != $RTVER ]
    then
     echo RT: $2 Feat: $FEAT
-    wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/features/patch-$1-$2.patch.bz2
-    bunzip2 patch-$1-$2.patch.bz2
-    mv patch-$1-$2.patch $3/1patch-$1-$2.patch
-    VER_PREFIX="$VER_PREFIX/older"
+#    wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/features/patch-$1-$2.patch.bz2
+#    bunzip2 patch-$1-$2.patch.bz2
+#    mv patch-$1-$2.patch $3/1patch-$1-$2.patch
+    download_rt_patch $VER_PREFIX/features $1-$2 $3/1patch-$1-$2.patch
+#    VER_PREFIX="$VER_PREFIX/older"
    fi
-  wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/patch-$1-$RTVER.patch.bz2
-  bunzip2 patch-$1-$RTVER.patch.bz2
-  mv patch-$1-$RTVER.patch $3/0patch-$1-$RTVER.patch
+#  wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/patch-$1-$RTVER.patch.bz2 || wget https://www.kernel.org/pub/linux/kernel/projects/rt/$VER_PREFIX/older/patch-$1-$RTVER.patch.bz2
+#  bunzip2 patch-$1-$RTVER.patch.bz2
+#  mv patch-$1-$RTVER.patch $3/0patch-$1-$RTVER.patch
+  download_rt_patch $VER_PREFIX $1-$RTVER $3/0patch-$1-$RTVER.patch
 }
 
 build_nena_drivers() {
