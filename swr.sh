@@ -95,6 +95,14 @@ build_nena_drivers() {
   cd ..
 }
 
+build_perf() {
+  OLDD=$(pwd)
+  cd $1/tools/perf
+  mkdir -p $2
+  make LDFLAGS="-static -pthread" NO_LIBPYTHON=YesPlease NO_LIBPERL=YesPlease O=$2 prefix=$3 install
+  cd $OLDD
+}
+
 while getopts 4Crkv:R: opt
  do
   case "$opt" in
@@ -138,6 +146,7 @@ mkdir -p $TMP_DIR/home/$VRUSER
 if [ x$RT != x ]
  then
   build_nena_drivers e1000e $HOST_KVER
+  build_perf linux-$HOST_KVER $(pwd)/build-perf-$HOST_KVER$EXTRAKNAME $TMP_DIR/home/$VRUSER
  fi
 update_home test.img 5 $TMP_DIR/home/$VRUSER
 add_to_grub test.img
