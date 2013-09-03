@@ -103,6 +103,22 @@ build_perf() {
   cd $OLDD
 }
 
+get_rttests() {
+  if test -e rt-tests;
+   then
+    echo click already exists
+   else
+    git clone git://git.kernel.org/pub/scm/linux/kernel/git/clrkwllms/rt-tests.git
+   fi
+}
+
+build_rttests() {
+  cd rt-tests
+  make NUMA=0 cyclictest
+  cp cyclictest $1
+  cd ..
+}
+
 while getopts 4Crkv:R: opt
  do
   case "$opt" in
@@ -147,6 +163,8 @@ if [ x$RT != x ]
  then
   build_nena_drivers e1000e $HOST_KVER
   build_perf linux-$HOST_KVER $(pwd)/build-perf-$HOST_KVER$EXTRAKNAME $TMP_DIR/home/$VRUSER
+  get_rttests
+  build_rttests $TMP_DIR/home/$VRUSER
  fi
 update_home test.img 5 $TMP_DIR/home/$VRUSER
 add_to_grub test.img
