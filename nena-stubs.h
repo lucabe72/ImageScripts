@@ -1,5 +1,3 @@
-#define napi_weight 128
-
 static inline gro_result_t nena_receive(struct napi_struct *napi, struct sk_buff *skb)
 {
 	int ret = netif_receive_skb(skb);
@@ -17,7 +15,10 @@ static inline int nena_schedule_prep(struct napi_struct *n)
 
 static inline __attribute__((always_inline)) void nena_schedule(struct napi_struct *n)
 {
-	while (n->poll(n, napi_weight) == napi_weight);
+	while (n->poll(n, n->weight) == n->weight) {
+		local_bh_enable();
+		local_bh_disable();
+	}
 }
 
 static inline void nena_complete(struct napi_struct *n)
