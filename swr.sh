@@ -84,14 +84,18 @@ get_rt_patch() {
   download_rt_patch $VER_PREFIX $1-$RTVER $3/0patch-$1-$RTVER.patch
 }
 
-build_nena_drivers() {
-  rm -rf $1-$2-nena
-  cp -r linux-$2/drivers/net/ethernet/intel/$1 $1-$2-nena
-  cd $1-$2-nena
-  cp $SDIR/nena-stubs.h .
-  echo \#include \"nena-stubs.h\" >> e1000.h
+build_drivers() {
+  rm -rf $1-$2-fixed
+  cp -r linux-$2/drivers/net/ethernet/intel/$1 $1-$2-fixed
+  cd $1-$2-fixed
+  patch_source $SDIR/Patches/$1 .
+  if [ x$3 != x ]
+   then
+    cp $SDIR/$3 .
+    echo \#include \"$3\" >> e1000.h
+   fi
   make -C $(pwd)/../build-host$2$EXTRAKNAME M=$(pwd) modules
-  cp $1.ko $TMP_DIR/home/$VRUSER/$1-$2$EXTRAKNAME.ko
+  cp $1.ko $TMP_DIR/home/$VRUSER/$1-$2$EXTRAKNAME$3.ko
   cd ..
 }
 
@@ -159,9 +163,10 @@ export KERN_PATCHES=$PATCHES
 HOST_CONFIG=$(get_kernel_config_name $HOST_KVER $HOST_ARCH host)$RTC
 sh $SDIR/buildhostlin.sh $CORE $SDIR/Configs/$HOST_CONFIG test.img
 mkdir -p $TMP_DIR/home/$VRUSER
+build_drivers e1000e $HOST_KVER
 if [ x$RT != x ]
  then
-  build_nena_drivers e1000e $HOST_KVER
+  build_drivers e1000e $HOST_KVER nena-stubs.h
   build_perf linux-$HOST_KVER $(pwd)/build-perf-$HOST_KVER$EXTRAKNAME $TMP_DIR/home/$VRUSER
   get_rttests
   build_rttests $TMP_DIR/home/$VRUSER
