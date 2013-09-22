@@ -59,16 +59,19 @@ download_rt_patch() {
   mv patch-$2.patch $3
 }
 
+get_version_prefix() {
+  MAJ=$(echo $1 | cut -d '.' -f 1)
+  MIN=$(echo $1 | cut -d '.' -f 2)
+  echo $MAJ.$MIN
+}
+
 get_rt_patch() {
 #  wget https://www.kernel.org/pub/linux/kernel/projects/rt/3.10/patches-3.10.6-rt3.tar.bz2
 #  tar xvjf patches-3.10.6-rt3.tar.bz2
 #  mv patches patches-3.10.6-rt3
-  MAJ=$(echo $1 | cut -d '.' -f 1)
-  MIN=$(echo $1 | cut -d '.' -f 2)
-  VER_PREFIX=$MAJ.$MIN
+  VER_PREFIX=$(get_version_prefix $1)
   RTVER=$(echo $2 | cut -d '-' -f 1)
   FEAT=$(echo $2 | cut -d '-' -f 2)
-  mkdir -p $3
   if [ $FEAT != $RTVER ]
    then
     echo RT: $2 Feat: $FEAT
@@ -147,6 +150,9 @@ if [ x$KEEPIMAGE = x ]
   sh $SDIR/create_image.sh test.img 512 256 
   sh $SDIR/grubit.sh test.img
  fi
+mkdir -p patches-$HOST_KVER-$RT
+cp $SDIR/Patches/SWRouter-Linux/$(get_version_prefix $HOST_KVER)/* patches-$HOST_KVER-$RT
+
 if [ x$RT != x ]
  then
   get_rt_patch $HOST_KVER $RT patches-$HOST_KVER-$RT

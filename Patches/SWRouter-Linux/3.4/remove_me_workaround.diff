@@ -1,0 +1,152 @@
+diff -urp linux-3.4/drivers/net/ethernet/intel/e1000e/e1000.h linux-3.4-fixed/drivers/net/ethernet/intel/e1000e/e1000.h
+--- linux-3.4/drivers/net/ethernet/intel/e1000e/e1000.h	2013-09-14 15:02:37.000000000 +0200
++++ linux-3.4-fixed/drivers/net/ethernet/intel/e1000e/e1000.h	2013-09-22 21:30:54.000000000 +0200
+@@ -155,9 +155,6 @@ struct e1000_info;
+ #define HV_M_STATUS_SPEED_1000            0x0200
+ #define HV_M_STATUS_LINK_UP               0x0040
+ 
+-#define E1000_ICH_FWSM_PCIM2PCI		0x01000000 /* ME PCIm-to-PCI active */
+-#define E1000_ICH_FWSM_PCIM2PCI_COUNT	2000
+-
+ /* Time to wait before putting the device into D3 if there's no link (in ms). */
+ #define LINK_TIMEOUT		100
+ 
+@@ -466,7 +463,6 @@ struct e1000_info {
+ #define FLAG2_DISABLE_AIM                 (1 << 8)
+ #define FLAG2_CHECK_PHY_HANG              (1 << 9)
+ #define FLAG2_NO_DISABLE_RX               (1 << 10)
+-#define FLAG2_PCIM2PCI_ARBITER_WA         (1 << 11)
+ #define FLAG2_DFLT_CRC_STRIPPING          (1 << 12)
+ 
+ #define E1000_RX_DESC_PS(R, i)	    \
+diff -urp linux-3.4/drivers/net/ethernet/intel/e1000e/ich8lan.c linux-3.4-fixed/drivers/net/ethernet/intel/e1000e/ich8lan.c
+--- linux-3.4/drivers/net/ethernet/intel/e1000e/ich8lan.c	2013-09-14 15:02:37.000000000 +0200
++++ linux-3.4-fixed/drivers/net/ethernet/intel/e1000e/ich8lan.c	2013-09-22 21:31:41.000000000 +0200
+@@ -807,11 +807,6 @@ static s32 e1000_get_variants_ich8lan(st
+ 	    (adapter->hw.phy.type != e1000_phy_ife))
+ 		adapter->flags |= FLAG_LSC_GIG_SPEED_DROP;
+ 
+-	/* Enable workaround for 82579 w/ ME enabled */
+-	if ((adapter->hw.mac.type == e1000_pch2lan) &&
+-	    (er32(FWSM) & E1000_ICH_FWSM_FW_VALID))
+-		adapter->flags2 |= FLAG2_PCIM2PCI_ARBITER_WA;
+-
+ 	/* Disable EEE by default until IEEE802.3az spec is finalized */
+ 	if (adapter->flags2 & FLAG2_HAS_EEE)
+ 		adapter->hw.dev_spec.ich8lan.eee_disable = true;
+diff -urp linux-3.4/drivers/net/ethernet/intel/e1000e/netdev.c linux-3.4-fixed/drivers/net/ethernet/intel/e1000e/netdev.c
+--- linux-3.4/drivers/net/ethernet/intel/e1000e/netdev.c	2013-09-14 15:02:37.000000000 +0200
++++ linux-3.4-fixed/drivers/net/ethernet/intel/e1000e/netdev.c	2013-09-22 21:34:02.000000000 +0200
+@@ -527,63 +527,6 @@ static void e1000_rx_checksum(struct e10
+ }
+ 
+ /**
+- * e1000e_update_tail_wa - helper function for e1000e_update_[rt]dt_wa()
+- * @hw: pointer to the HW structure
+- * @tail: address of tail descriptor register
+- * @i: value to write to tail descriptor register
+- *
+- * When updating the tail register, the ME could be accessing Host CSR
+- * registers at the same time.  Normally, this is handled in h/w by an
+- * arbiter but on some parts there is a bug that acknowledges Host accesses
+- * later than it should which could result in the descriptor register to
+- * have an incorrect value.  Workaround this by checking the FWSM register
+- * which has bit 24 set while ME is accessing Host CSR registers, wait
+- * if it is set and try again a number of times.
+- **/
+-static inline s32 e1000e_update_tail_wa(struct e1000_hw *hw, void __iomem *tail,
+-					unsigned int i)
+-{
+-	unsigned int j = 0;
+-
+-	while ((j++ < E1000_ICH_FWSM_PCIM2PCI_COUNT) &&
+-	       (er32(FWSM) & E1000_ICH_FWSM_PCIM2PCI))
+-		udelay(50);
+-
+-	writel(i, tail);
+-
+-	if ((j == E1000_ICH_FWSM_PCIM2PCI_COUNT) && (i != readl(tail)))
+-		return E1000_ERR_SWFW_SYNC;
+-
+-	return 0;
+-}
+-
+-static void e1000e_update_rdt_wa(struct e1000_ring *rx_ring, unsigned int i)
+-{
+-	struct e1000_adapter *adapter = rx_ring->adapter;
+-	struct e1000_hw *hw = &adapter->hw;
+-
+-	if (e1000e_update_tail_wa(hw, rx_ring->tail, i)) {
+-		u32 rctl = er32(RCTL);
+-		ew32(RCTL, rctl & ~E1000_RCTL_EN);
+-		e_err("ME firmware caused invalid RDT - resetting\n");
+-		schedule_work(&adapter->reset_task);
+-	}
+-}
+-
+-static void e1000e_update_tdt_wa(struct e1000_ring *tx_ring, unsigned int i)
+-{
+-	struct e1000_adapter *adapter = tx_ring->adapter;
+-	struct e1000_hw *hw = &adapter->hw;
+-
+-	if (e1000e_update_tail_wa(hw, tx_ring->tail, i)) {
+-		u32 tctl = er32(TCTL);
+-		ew32(TCTL, tctl & ~E1000_TCTL_EN);
+-		e_err("ME firmware caused invalid TDT - resetting\n");
+-		schedule_work(&adapter->reset_task);
+-	}
+-}
+-
+-/**
+  * e1000_alloc_rx_buffers - Replace used receive buffers
+  * @rx_ring: Rx descriptor ring
+  **/
+@@ -638,10 +581,7 @@ map_skb:
+ 			 * such as IA-64).
+ 			 */
+ 			wmb();
+-			if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
+-				e1000e_update_rdt_wa(rx_ring, i);
+-			else
+-				writel(i, rx_ring->tail);
++			writel(i, rx_ring->tail);
+ 		}
+ 		i++;
+ 		if (i == rx_ring->count)
+@@ -741,10 +681,7 @@ static void e1000_alloc_rx_buffers_ps(st
+ 			 * such as IA-64).
+ 			 */
+ 			wmb();
+-			if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
+-				e1000e_update_rdt_wa(rx_ring, i << 1);
+-			else
+-				writel(i << 1, rx_ring->tail);
++			writel(i << 1, rx_ring->tail);
+ 		}
+ 
+ 		i++;
+@@ -827,10 +764,7 @@ check_page:
+ 		 * applicable for weak-ordered memory model archs,
+ 		 * such as IA-64). */
+ 		wmb();
+-		if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
+-			e1000e_update_rdt_wa(rx_ring, i);
+-		else
+-			writel(i, rx_ring->tail);
++		writel(i, rx_ring->tail);
+ 	}
+ }
+ 
+@@ -4926,11 +4860,7 @@ static void e1000_tx_queue(struct e1000_
+ 
+ 	tx_ring->next_to_use = i;
+ 
+-	if (adapter->flags2 & FLAG2_PCIM2PCI_ARBITER_WA)
+-		e1000e_update_tdt_wa(tx_ring, i);
+-	else
+-		writel(i, tx_ring->tail);
+-
++	writel(i, tx_ring->tail);
+ 	/*
+ 	 * we need this if more than one processor can write to our tail
+ 	 * at a time, it synchronizes IO on IA64/Altix systems
