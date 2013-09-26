@@ -152,12 +152,12 @@ if [ x$KEEPIMAGE = x ]
  fi
 mkdir -p patches-$HOST_KVER-$RT
 cp $SDIR/Patches/SWRouter-Linux/$(get_version_prefix $HOST_KVER)/* patches-$HOST_KVER-$RT
+PATCHES=$(pwd)/patches-$HOST_KVER-$RT
 
 if [ x$RT != x ]
  then
   get_rt_patch $HOST_KVER $RT patches-$HOST_KVER-$RT
   RTC=-rt
-  PATCHES=$(pwd)/patches-$HOST_KVER-$RT
  fi
 export KVER=$HOST_KVER
 export ARCH=$HOST_ARCH
