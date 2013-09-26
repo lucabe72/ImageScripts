@@ -111,7 +111,8 @@ get_rttests() {
    then
     echo click already exists
    else
-    git clone git://git.kernel.org/pub/scm/linux/kernel/git/clrkwllms/rt-tests.git
+    #git clone git://git.kernel.org/pub/scm/linux/kernel/git/clrkwllms/rt-tests.git
+    git clone http://git.kernel.org/pub/scm/linux/kernel/git/clrkwllms/rt-tests.git
    fi
 }
 
