@@ -27,7 +27,7 @@ for I in $IFACES
   /sbin/ifconfig $NAME txqueuelen 20000
  done
 
-if [ "x$GW" = "x" ]
+if [ "x$GATEWAY" != "x" ]
  then
   route add default gw $GATEWAY
 fi
@@ -39,4 +39,4 @@ if [ x$NOROUTE = x ]
   Public-Quagga/lib64/ld-linux-x86-64.so.2 --library-path Public-Quagga/lib:Public-Quagga/lib64 Public-Quagga/sbin/zebra -u root -g root -f zebra.conf -d
   Public-Quagga/lib64/ld-linux-x86-64.so.2 --library-path Public-Quagga/lib:Public-Quagga/lib64 Public-Quagga/sbin/ospfd -u root -g root -f ospfd.conf -d
 fi
-  
+
