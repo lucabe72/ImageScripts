@@ -64,4 +64,5 @@ export KVER=$HOST_KVER
 export ARCH=$HOST_ARCH
 HOST_CONFIG=$(get_kernel_config_name $HOST_KVER $HOST_ARCH host)
 sh $SDIR/buildhostlin.sh $CORE $SDIR/Configs/$HOST_CONFIG test.img
+sh $SDIR/buildovs.sh test.img 2.0.0 
 sh $SDIR/buildkvm.sh test.img $KVM_NAME $KVM_PATCHES 
