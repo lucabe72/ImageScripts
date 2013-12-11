@@ -45,9 +45,9 @@ get_kvm() {
 }
 
 build_kvm() {
-  mkdir $4
+  mkdir -p $4
   cd $4
-  LDFLAGS=-lrt ../$3/configure --prefix=$1 --disable-docs --target-list="i386-softmmu x86_64-softmmu"
+  LIBS=-lrt ../$3/configure --prefix=$1 --disable-docs --target-list="i386-softmmu x86_64-softmmu" --disable-guest-agent
   make -j $2
   cd ..
 }
