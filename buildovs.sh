@@ -38,11 +38,11 @@ install_ovs() {
 
 get_libs64() {
 echo Get libs 64
-  APPS_BIN=""
-  APPS_SBIN="babeld bgpd ospf6d ospfclient ospfd ripd ripngd watchquagga zebra"
-  APPS_LIBS="libzebra.so"
+  APPS_BIN="ovs-vsctl"
+  APPS_SBIN=""
+  APPS_LIBS=""
   PROVIDED_LIBS=""
-  LD_LINUX=$(strings $1/sbin/zebra | grep ld-linux)
+  LD_LINUX=$(strings $1/bin/ovs-vsctl | grep ld-linux)
 
   mkdir -p $1/lib64
 
