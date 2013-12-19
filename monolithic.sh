@@ -6,18 +6,18 @@ SDIR=$(cd -- $(dirname $0) && pwd)
 
 export HOST_ARCH=x86
 export GUEST_ARCH=x86
-CORE=$SDIR/core.gz
+CORE=$(pwd)/test.gz
 HOST_KVER=3.4.14
 GUEST_KVER=3.4.14
 EXTRAKNAME="-vrhost"
 KVM_NAME=qemu-kvm-git
 
-while getopts 48cknq:v: opt
+while getopts 48c:knq:v: opt
  do
   case "$opt" in
     4)		HOST_ARCH=x86_64;;
     8)		GUEST_ARCH=x86_64;;
-    c)		CORE=$(pwd)/test.gz;;
+    c)		CORE=$OPTARG;;
     k)		KEEPIMAGE=YesPlease;;
     n)		NETMAP_PATCH=YesPlease;;
     q)		KVM_NAME=$OPTARG;;
