@@ -25,7 +25,8 @@ get_ovs() {
 
 build_ovs() {
   cd $3
-  ./configure --prefix=$1 --disable-ssl --enable-ndebug --with-linux=$4
+  ./configure --prefix=$1 --disable-ssl --enable-ndebug
+#  ./configure --prefix=$1 --disable-ssl --enable-ndebug --with-linux=$4
   make -j $2
   cd ..
 }
