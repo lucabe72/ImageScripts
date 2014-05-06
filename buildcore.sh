@@ -47,7 +47,7 @@ get_bb() {
 }
 
 build_bb() {
-  BUILDDIR=$4
+  BUILDDIR=$4$EXTRANAME
 
   mkdir -p $BUILDDIR
   cd       $BUILDDIR
@@ -58,7 +58,7 @@ build_bb() {
 }
 
 install_bb() {
-  cd $1
+  cd $1$EXTRANAME
   rm -rf _install
   make install
   cd ..
@@ -105,19 +105,19 @@ get_sudo() {
 }
 
 build_sudo() {
-  BUILDDIR=$3
+  BUILDDIR=$3$EXTRANAME
 
   mkdir -p $BUILDDIR
   cd       $BUILDDIR
-  ../$1/configure --prefix=/ --disable-authentication --disable-shadow --disable-pam-session --disable-zlib --without-lecture --without-sendmail --without-umask --without-interfaces --without-pam
+  ../$1/configure --prefix=/ --disable-authentication --disable-shadow --disable-pam-session --disable-zlib --without-lecture --without-sendmail --without-umask --without-interfaces --without-pam $CROSS
   make -j $2
   cd ..
 }
 
 install_sudo() {
-  BBBUILD=$2
+  BBBUILD=$2$EXTRANAME
 
-  cd $1
+  cd $1$EXTRANAME
   rm -rf /tmp/S
   make DESTDIR=/tmp/S install
   cp /tmp/S/bin/sudo $BBBUILD/_install/bin
@@ -129,6 +129,29 @@ install_sudo() {
 
   cd ..
 }
+
+if [ x$ARCH = xx86_64 ];
+ then
+  EXTRANAME=64
+  export CFLAGS=-m64
+  export LDFLAGS=-m64
+  if [ $(arch) = x86_64];
+   then
+    echo
+   else
+    CROSS="--host=x86_64-unknown-linux-gnu"
+   fi
+ fi
+if [ x$ARCH = xx86 ];
+ then
+  EXTRANAME=32
+  export CFLAGS=-m32
+  export LDFLAGS=-m32
+  if [ $(arch) = x86_64];
+   then
+    CROSS="--host=i686-unknown-linux-gnu"
+   fi
+ fi
 
 get_bb		busybox-$BBVER
 patch_source	$SDIR/Patches/BusyBox/$BBVER busybox-$BBVER 

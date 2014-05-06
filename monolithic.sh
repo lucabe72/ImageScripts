@@ -27,11 +27,15 @@ while getopts 48c:knq:v: opt
   esac
  done
 
+MY_ARCH=$(arch)
 if test -e $CORE;
  then
   echo $CORE already exists
  else
   echo Building $CORE
+  if [ $MY_ARCH = x86_64 ];
+   then
+   fi
   sh $SDIR/buildcore.sh $CORE
  fi
 
