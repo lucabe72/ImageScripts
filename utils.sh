@@ -143,9 +143,9 @@ get_kernel() {
       echo $1.tar.bz2 already exists
      else
       KPATH=$(get_kernel_path $KVER)
-      wget http://www.kernel.org/pub/linux/kernel/$KPATH/$1.tar.bz2
+      wget http://www.kernel.org/pub/linux/kernel/$KPATH/$1.tar.gz
      fi
-    tar xvjf $1.tar.bz2
+    tar xvzf $1.tar.gz
    fi
 }
 
