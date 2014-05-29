@@ -41,8 +41,8 @@ install_lxc() {
 
 make_lxc() {
   get_lxc     lxc-$2
-  build_lxc   $TARGET_PATH $CPUS lxc-$2 build-lxc-$2
-  install_lxc $1 build-lxc-$2
+  build_lxc   $TARGET_PATH $CPUS lxc-$2 lxc-$2
+  install_lxc $1 lxc-$2
 }
 
 update_home() {
