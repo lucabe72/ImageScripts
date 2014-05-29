@@ -18,7 +18,7 @@ get_lxc() {
      then
       echo $1.tar.gz already exists
      else
-      wget $SITE/$1.tar.gz
+      wget --no-check-certificate $SITE/$1.tar.gz
      fi
     tar xvzf $1.tar.gz
    fi
