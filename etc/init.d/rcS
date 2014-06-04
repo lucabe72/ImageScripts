@@ -143,7 +143,13 @@ export PATH=/usr/local/sbin:/usr/local/bin:"$PATH"
 
 # Here we check all the boot parameters using the fastest way known to men, case & loop
 echo -n "${BLUE}Checking boot options...${NORMAL}"
-for i in `cat /proc/cmdline`; do
+if [ -f /etc/sysconfig/cmdline ];
+ then
+  CMDLINE=$(cat /etc/sysconfig/cmdline)
+ else
+  CMDLINE=$(cat /proc/cmdline)
+ fi
+for i in $CMDLINE; do
 	case $i in
 		*=*)
 			case $i in
