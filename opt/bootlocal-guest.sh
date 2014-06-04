@@ -1,5 +1,10 @@
 IFACES="eth0-192.168.1.3,eth0:0-192.168.2.3"
-CMDLINE=$(cat /proc/cmdline)
+if [ -f /etc/sysconfig/cmdline ];
+ then
+  CMDLINE=$(cat /etc/sysconfig/cmdline)
+ else
+  CMDLINE=$(cat /proc/cmdline)
+ fi
 
 for cmd in $CMDLINE
  do
