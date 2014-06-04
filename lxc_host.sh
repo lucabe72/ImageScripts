@@ -50,7 +50,8 @@ export KVER=$HOST_KVER
 export ARCH=$HOST_ARCH
 HOST_CONFIG=$(get_kernel_config_name $HOST_KVER $HOST_ARCH host)
 sh $SDIR/buildhostlin.sh  $CORE $SDIR/Configs/$HOST_CONFIG test.img
-sh $SDIR/buildlxc.sh      test.img 0.9.0 
+sh $SDIR/buildlxc.sh      test.img 1.0.3
 sh $SDIR/buildovs.sh      test.img 2.0.0 
+sh $SDIR/buildkvm.sh      test.img $KVM_NAME $KVM_PATCHES 
 sh $SDIR/buildiproute2.sh test.img 3.12.0
 sh $SDIR/buildethtool.sh  test.img 3.12.1

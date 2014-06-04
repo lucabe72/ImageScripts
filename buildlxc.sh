@@ -27,7 +27,7 @@ get_lxc() {
 build_lxc() {
   mkdir -p $4
   cd $4
-  ../$3/configure --prefix=$1 --disable-capabilities --disable-doc
+  ../$3/configure --prefix=$1 --disable-capabilities --disable-doc --disable-examples --disable-api-docs --disable-selinux
   make -j $2
   cd ..
 }
