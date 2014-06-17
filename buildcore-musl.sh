@@ -37,7 +37,6 @@ get_bb() {
 }
 
 build_bb() {
-  export PATH=$PATH:$COMPILER_PATH/bin
   BUILDDIR=$4
 
   mkdir -p $BUILDDIR
@@ -88,7 +87,6 @@ get_sudo() {
 
 build_sudo() {
   BUILDDIR=$3
-  export PATH=$PATH:$COMPILER_PATH/bin
 
   mkdir -p $BUILDDIR
   cd       $BUILDDIR
