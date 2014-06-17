@@ -1,0 +1,40 @@
+Only in busybox-1.20.2.patched/include: asm-x86_64
+diff -urp busybox-1.20.2/include/libbb.h busybox-1.20.2.patched/include/libbb.h
+--- busybox-1.20.2/include/libbb.h	2014-06-12 14:46:21.000000000 +0200
++++ busybox-1.20.2.patched/include/libbb.h	2014-06-12 14:31:05.000000000 +0200
+@@ -37,7 +37,7 @@
+ #include <libgen.h> /* dirname,basename */
+ #undef basename
+ #define basename dont_use_basename
+-#include <sys/poll.h>
++#include <poll.h>
+ #include <sys/ioctl.h>
+ #include <sys/mman.h>
+ #include <sys/socket.h>
+diff -urp busybox-1.20.2/networking/ifconfig.c busybox-1.20.2.patched/networking/ifconfig.c
+--- busybox-1.20.2/networking/ifconfig.c	2012-06-26 15:35:45.000000000 +0200
++++ busybox-1.20.2.patched/networking/ifconfig.c	2014-06-12 14:32:43.000000000 +0200
+@@ -56,7 +56,7 @@
+ #endif
+ 
+ #if ENABLE_FEATURE_IFCONFIG_SLIP
+-# include <net/if_slip.h>
++# include <linux/if_slip.h>
+ #endif
+ 
+ /* I don't know if this is needed for busybox or not.  Anyone? */
+diff -urp busybox-1.20.2/networking/libiproute/iplink.c busybox-1.20.2.patched/networking/libiproute/iplink.c
+--- busybox-1.20.2/networking/libiproute/iplink.c	2012-06-26 15:35:45.000000000 +0200
++++ busybox-1.20.2.patched/networking/libiproute/iplink.c	2014-06-12 14:36:17.000000000 +0200
+@@ -5,8 +5,8 @@
+  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+  */
+ #include <net/if.h>
+-#include <net/if_packet.h>
+-#include <netpacket/packet.h>
++#include <linux/if_packet.h>
++//#include <netpacket/packet.h>
+ #include <netinet/if_ether.h>
+ 
+ #include "ip_common.h"  /* #include "libbb.h" is inside */
+Only in busybox-1.20.2.patched/: .patched
