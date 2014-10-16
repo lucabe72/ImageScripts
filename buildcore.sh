@@ -16,8 +16,11 @@ get_exec_libs_root() {
     DIR=$(dirname $L | cut -f 2 -d '/')
     cp $L $2/$DIR
    done
-  mkdir -p $2/$(dirname $LD_LINUX)
-  cp $LD_LINUX $2/$(dirname $LD_LINUX)
+  if [ ! -e $2/$LD_LINUX ]
+   then
+    mkdir -p $2/$(dirname $LD_LINUX)
+    cp $LD_LINUX $2/$(dirname $LD_LINUX)
+   fi
 }
 
 fetch_lib() {
