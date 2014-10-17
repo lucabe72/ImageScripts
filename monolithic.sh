@@ -35,6 +35,7 @@ if test -e $CORE;
   echo Building $CORE
   if [ $MY_ARCH = x86_64 ];
    then
+    export ARCH=x86
    fi
   sh $SDIR/buildcore.sh $CORE
  fi
