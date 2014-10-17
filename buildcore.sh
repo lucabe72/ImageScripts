@@ -13,7 +13,8 @@ get_exec_libs_root() {
   LD_LINUX=$(strings $1 | grep ld-linux)
   for L in $LIBS
    do
-    DIR=$(dirname $L | cut -f 2 -d '/')
+    #DIR=$(dirname $L | cut -f 2 -d '/')
+    DIR=lib
     cp $L $2/$DIR
    done
   mkdir -p $2/$(dirname $LD_LINUX)
@@ -21,7 +22,7 @@ get_exec_libs_root() {
 }
 
 fetch_lib() {
-  D=$(ldd /bin/ls | grep libc | cut -f 3 -d ' ' | xargs dirname)
+  D=$(ldd $4 | grep libc | cut -f 3 -d ' ' | xargs dirname)
   LIB=$(find $D -name $2)
   if [ "x$LIB" != "x" ];
    then
@@ -47,7 +48,7 @@ get_bb() {
 }
 
 build_bb() {
-  BUILDDIR=$4$EXTRANAME
+  BUILDDIR=$4
 
   mkdir -p $BUILDDIR
   cd       $BUILDDIR
@@ -58,7 +59,7 @@ build_bb() {
 }
 
 install_bb() {
-  cd $1$EXTRANAME
+  cd $1
   rm -rf _install
   make install
   cd ..
@@ -67,9 +68,9 @@ install_bb() {
 #FIXME: Why are this needed? Just for completeness?
 fetch_std_libs() {
   cd $1
-  fetch_lib /lib/ libpthread.so.0 _install
-  fetch_lib /lib/ librt.so.1 _install
-  fetch_lib /lib/ libdl.so.2 _install
+  fetch_lib /lib/ libpthread.so.0 _install _install/bin/busybox
+  fetch_lib /lib/ librt.so.1      _install _install/bin/busybox
+  fetch_lib /lib/ libdl.so.2      _install _install/bin/busybox
   cd ..
 }
 
@@ -105,7 +106,7 @@ get_sudo() {
 }
 
 build_sudo() {
-  BUILDDIR=$3$EXTRANAME
+  BUILDDIR=$3
 
   mkdir -p $BUILDDIR
   cd       $BUILDDIR
@@ -115,17 +116,17 @@ build_sudo() {
 }
 
 install_sudo() {
-  BBBUILD=$2$EXTRANAME
+  BBBUILD=$2
 
-  cd $1$EXTRANAME
+  cd $1
   rm -rf /tmp/S
   make DESTDIR=/tmp/S install
   cp /tmp/S/bin/sudo $BBBUILD/_install/bin
   get_exec_libs_root $BBBUILD/_install/bin/sudo $BBBUILD/_install
 
   #FIXME: Check this!
-  fetch_lib /lib/   libnss_compat* $BBBUILD/_install
-  fetch_lib /lib/   libnss_files*  $BBBUILD/_install
+  fetch_lib /lib/   libnss_compat* $BBBUILD/_install $BBBUILD/_install/bin/sudo
+  fetch_lib /lib/   libnss_files*  $BBBUILD/_install $BBBUILD/_install/bin/sudo
 
   cd ..
 }
@@ -155,13 +156,13 @@ if [ x$ARCH = xx86 ];
 
 get_bb		busybox-$BBVER
 patch_source	$SDIR/Patches/BusyBox/$BBVER busybox-$BBVER 
-build_bb	busybox-$BBVER $CONFIG_FILE $CPUS bb_build-$BBVER
-install_bb	bb_build-$BBVER
-build_root	bb_build-$BBVER
-fetch_std_libs	bb_build-$BBVER
+build_bb	busybox-$BBVER $CONFIG_FILE $CPUS bb_build-$BBVER$EXTRANAME
+install_bb	bb_build-$BBVER$EXTRANAME
+build_root	bb_build-$BBVER$EXTRANAME
+fetch_std_libs	bb_build-$BBVER$EXTRANAME
 
 get_sudo	sudo-1.7.10p3
 build_sudo	sudo-1.7.10p3 $CPUS sudo_build-1.7.10p3
-install_sudo	sudo_build-1.7.10p3 $(pwd)/bb_build-$BBVER
+install_sudo	sudo_build-1.7.10p3 $(pwd)/bb_build-$BBVER$EXTRANAME
 
-mk_initramfs bb_build-$BBVER/_install $1 NoSUDO
+mk_initramfs bb_build-$BBVER$EXTRANAME/_install $1 NoSUDO
