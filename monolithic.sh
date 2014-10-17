@@ -12,7 +12,7 @@ GUEST_KVER=3.4.14
 EXTRAKNAME="-vrhost"
 KVM_NAME=qemu-kvm-git
 
-while getopts 48c:knq:v: opt
+while getopts 48c:knq:v:V: opt
  do
   case "$opt" in
     4)		HOST_ARCH=x86_64;;
@@ -22,6 +22,7 @@ while getopts 48c:knq:v: opt
     n)		NETMAP_PATCH=YesPlease;;
     q)		KVM_NAME=$OPTARG;;
     v)		HOST_KVER=$OPTARG;;
+    V)		GUEST_KVER=$OPTARG;;
     [?])	print >&2 "Usage: $0 [-4]"
 		exit 1;;
   esac
