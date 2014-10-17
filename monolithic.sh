@@ -9,10 +9,11 @@ export GUEST_ARCH=x86
 CORE=$(pwd)/test.gz
 HOST_KVER=3.4.14
 GUEST_KVER=3.4.14
+OVSVER=2.0.0
 EXTRAKNAME="-vrhost"
 KVM_NAME=qemu-kvm-git
 
-while getopts 48c:knq:v:V: opt
+while getopts 48c:knq:v:V:o: opt
  do
   case "$opt" in
     4)		HOST_ARCH=x86_64;;
@@ -23,6 +24,7 @@ while getopts 48c:knq:v:V: opt
     q)		KVM_NAME=$OPTARG;;
     v)		HOST_KVER=$OPTARG;;
     V)		GUEST_KVER=$OPTARG;;
+    o)		OVSVER=$OPTARG;;
     [?])	print >&2 "Usage: $0 [-4]"
 		exit 1;;
   esac
@@ -70,7 +72,7 @@ export KVER=$HOST_KVER
 export ARCH=$HOST_ARCH
 HOST_CONFIG=$(get_kernel_config_name $HOST_KVER $HOST_ARCH host)
 sh $SDIR/buildhostlin.sh  $CORE $SDIR/Configs/$HOST_CONFIG test.img
-sh $SDIR/buildovs.sh      test.img 2.0.0 
+sh $SDIR/buildovs.sh      test.img $OVSVER 
 sh $SDIR/buildkvm.sh      test.img $KVM_NAME $KVM_PATCHES 
 sh $SDIR/buildiproute2.sh test.img 3.12.0
 sh $SDIR/buildethtool.sh  test.img 3.12.1
