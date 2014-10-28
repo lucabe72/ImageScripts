@@ -155,7 +155,7 @@ build_kernel() {
   mkdir -p $BUILDDIR
   cd       $BUILDDIR
   cp $2 .config
-  make -C $(pwd)/../$1 O=$(pwd) oldconfig
+  make -C $(pwd)/../$1 O=$(pwd) oldnoconfig #oldconfig
   make -j $3
   cd ..
 }
